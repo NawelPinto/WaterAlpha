@@ -1,103 +1,182 @@
 
 /*
- * WaterAlpha - Control de interfaz
- * BLOQUE 2.2
+ * WATERALPHA - INTERFAZ WEB
+ * Bloque 4
  */
 
+const api = window.WaterAlphaAPI;
 const mock = window.waterAlphaMock;
+const config = window.WaterAlphaConfig;
 
-// Actualiza la información visible
-function render() {
+const element = id => document.getElementById(id);
 
-  const data = mock.getReadings();
+let updating = false;
 
-  // Mostrar mediciones
-  document.getElementById("ph-value").textContent =
-    data.ph_sensor_ok ? data.ph.toFixed(2) : "--";
+// Ocultar simulador si usamos hardware real
+document.querySelector(".simulator").hidden =
+  config.API_MODE !== "MOCK";
 
-  document.getElementById("temperature-value").textContent =
-    data.temperature_sensor_ok
-      ? data.temperature.toFixed(1)
-      : "--";
+// Mostrar una respuesta válida
+function render(data) {
+
+  element("mode-badge").textContent =
+    data.mode === "MOCK"
+      ? "MODO SIMULACIÓN"
+      : "DISPOSITIVO REAL";
+
+  // Estado entregado por la API
+  element("status-light").className =
+    "status-light " + data.state.toLowerCase();
+
+  element("status-title").textContent =
+    data.state === "GREEN"
+      ? "Sin anomalía detectada"
+      : data.state === "RED"
+        ? "Anomalía detectada"
+        : data.state === "YELLOW"
+          ? "Precaución"
+          : data.state === "BLUE"
+            ? "Inicializando"
+            : "Error del sistema";
+
+  element("status-message").textContent =
+    data.message;
+
+  // Mediciones
+  element("ph-value").textContent =
+    data.ph === null ? "--" : data.ph.toFixed(2);
+
+  element("temperature-value").textContent =
+    data.temperature === null
+      ? "--"
+      : data.temperature.toFixed(1);
 
   // Diagnósticos
-  document.getElementById("ph-sensor-status").textContent =
+  element("ph-sensor-status").textContent =
     data.ph_sensor_ok
       ? "✓ Sensor de pH: OK"
-      : "✕ Sensor de pH: desconectado (simulado)";
+      : "✕ Sensor de pH: error";
 
-  document.getElementById("temperature-sensor-status").textContent =
+  element("temperature-sensor-status").textContent =
     data.temperature_sensor_ok
-      ? "✓ Sensor de temperatura: OK"
-      : "✕ Sensor de temperatura: desconectado (simulado)";
+      ? "✓ Sensor temperatura: OK"
+      : "✕ Sensor temperatura: error";
 
-  document.getElementById("stability-status").textContent =
+  element("stability-status").textContent =
     data.stable
       ? "✓ Lectura estable"
       : "○ Lectura inestable";
 
-  document.getElementById("calibration-status").textContent =
+  element("calibration-status").textContent =
     data.calibrated
-      ? "✓ Calibración válida (simulada)"
+      ? "✓ Calibración válida"
       : "✕ Calibración pendiente";
 
-  // Estado provisional
-  document.getElementById("status-title").textContent =
-    "Simulación activa";
-
-  document.getElementById("status-message").textContent =
-    "Lecturas ficticias. Evaluación de estados pendiente.";
+  // Inspector JSON
+  element("json-preview").textContent =
+    JSON.stringify(data, null, 2);
 }
 
-// Control deslizante de pH
-document.getElementById("ph-input")
-  .addEventListener("input", (event) => {
+// Fallo de comunicación
+function showConnectionError(error) {
+
+  element("mode-badge").textContent =
+    "SIN CONEXIÓN";
+
+  element("status-light").className =
+    "status-light offline";
+
+  element("status-title").textContent =
+    "Sin conexión";
+
+  element("status-message").textContent =
+    "No se pudo obtener una lectura actualizada.";
+
+  element("ph-value").textContent = "--";
+  element("temperature-value").textContent = "--";
+
+  [
+    "ph-sensor-status",
+    "temperature-sensor-status",
+    "stability-status",
+    "calibration-status"
+  ].forEach(id => {
+    element(id).textContent = "— Sin datos recientes";
+  });
+
+  element("json-preview").textContent =
+    "Error: " + error.message;
+}
+
+// Obtener datos a través de la API
+async function refresh() {
+
+  if (updating) return;
+
+  updating = true;
+
+  try {
+    const data = await api.getReadings();
+    render(data);
+
+  } catch (error) {
+    console.error("[WaterAlpha]", error);
+    showConnectionError(error);
+
+  } finally {
+    updating = false;
+  }
+}
+
+// Slider de pH
+function registerSlider(id, key, outputId, decimals, unit = "") {
+
+  element(id).addEventListener("input", event => {
 
     const value = Number(event.target.value);
 
-    mock.updateReadings({ ph: value });
+    mock.updateReadings({ [key]: value });
 
-    document.getElementById("ph-slider-value")
-      .textContent = value.toFixed(2);
+    element(outputId).textContent =
+      value.toFixed(decimals) + unit;
 
-    render();
+    refresh();
   });
+}
 
-// Control deslizante de temperatura
-document.getElementById("temperature-input")
-  .addEventListener("input", (event) => {
+registerSlider("ph-input", "ph", "ph-slider-value", 2);
 
-    const value = Number(event.target.value);
+registerSlider(
+  "temperature-input",
+  "temperature",
+  "temperature-slider-value",
+  1,
+  " °C"
+);
 
-    mock.updateReadings({ temperature: value });
-
-    document.getElementById("temperature-slider-value")
-      .textContent = value.toFixed(1) + " °C";
-
-    render();
-  });
-
-// Controles de diagnóstico
+// Casillas del simulador
 const switches = [
   ["ph-connected", "ph_sensor_ok"],
   ["temperature-connected", "temperature_sensor_ok"],
   ["stable-input", "stable"],
-  ["calibrated-input", "calibrated"]
+  ["calibrated-input", "calibrated"],
+  ["initializing-input", "initializing"]
 ];
 
 switches.forEach(([id, key]) => {
 
-  document.getElementById(id)
-    .addEventListener("change", (event) => {
+  element(id).addEventListener("change", event => {
 
-      mock.updateReadings({
-        [key]: event.target.checked
-      });
-
-      render();
+    mock.updateReadings({
+      [key]: event.target.checked
     });
 
+    refresh();
+  });
 });
 
-// Primera actualización
-render();
+// Actualización automática
+setInterval(refresh, config.API_REFRESH_MS);
+
+// Primera consulta
+refresh();

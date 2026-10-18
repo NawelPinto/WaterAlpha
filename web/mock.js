@@ -18,8 +18,7 @@ const simulatedReadings = {
 
   stable: true,
   calibrated: true,
-
-  state: "BLUE"
+  initializing: false
 };
 
 // Proveedor de lecturas simuladas

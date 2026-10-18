@@ -9,8 +9,12 @@
 
   <!-- Conexión con nuestro archivo CSS -->
   <link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script>
   <script src="mock.js" defer></script>
-  <script src="app.js" defer></script>  
+  <script src="state_machine.js" defer></script>
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+ 
 </head>
 
 <body>
@@ -21,7 +25,7 @@
     <header class="header">
       <span class="brand">WATER<span>ALPHA</span></span>
       <p>Evaluación preliminar de agua</p>
-      <span class="mode">MODO SIMULACIÓN</span>
+      <span id="mode-badge" class="mode">MODO SIMULACIÓN</span>
     </header>
 
     <!-- ESTADO PRINCIPAL -->
@@ -129,10 +133,29 @@
       <input type="checkbox" id="calibrated-input" checked>
       Calibración válida
     </label>
+    
+    <label>
+      <input type="checkbox" id="initializing-input">
+      Sistema inicializando
+    </label>
+
 
   </div>
 
 </section>
+
+
+<!-- INSPECTOR DE API -->
+<details class="api-debug">
+
+  <summary>
+    Datos recibidos de la API (JSON)
+  </summary>
+
+  <pre id="json-preview">Esperando respuesta...</pre>
+
+</details>
+
 
     <!-- ADVERTENCIA -->
     <footer class="warning">

@@ -233,3 +233,84 @@ body {
 .mock-flags input {
   accent-color: var(--accent);
 }
+
+
+/* ESTADOS DEL LED VIRTUAL */
+
+.status-light.green {
+  background: #22c55e;
+  box-shadow: 0 0 45px #22c55e80;
+}
+
+.status-light.yellow {
+  background: #eab308;
+  box-shadow: 0 0 45px #eab30880;
+}
+
+.status-light.red {
+  background: #ef4444;
+  box-shadow: 0 0 45px #ef444480;
+}
+
+.status-light.magenta {
+  background: #d946ef;
+  box-shadow: 0 0 45px #d946ef80;
+  animation: error-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes error-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Accesibilidad: reducir animaciones */
+@media (prefers-reduced-motion: reduce) {
+  .status-light.magenta {
+    animation: none;
+  }
+}
+
+
+/* INSPECTOR DE API */
+
+.api-debug {
+  margin-top: 16px;
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid #223247;
+  border-radius: 18px;
+}
+
+.api-debug summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.api-debug pre {
+  padding: 16px;
+  background: #08111f;
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 320px;
+  overflow: auto;
+}
+
+/* Estado de pérdida de comunicación */
+.status-light.offline {
+  background: #64748b;
+  box-shadow: 0 0 25px #64748b55;
+}
+
+.simulator[hidden] {
+  display: none;
+}
