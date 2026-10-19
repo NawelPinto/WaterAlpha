@@ -1,7 +1,8 @@
-
+#include "ph_calibration.h"
+#include "ph_pipeline.h"
 #include <Arduino.h>
 #include <limits>
-
+#include "led_rgb.h"
 #include "controller.h"
 #include "mock_sensors.h"
 #include "state_machine.h"
@@ -28,44 +29,84 @@ namespace {
 
 
   // Actuador LED simulado
+  
   void setLedState(WA::State state) {
 
+    // Mantener diagnostico por Serial.
     Serial.print("[LED MOCK] ");
     Serial.println(WA::stateName(state));
+
+    // Actualizar LED fisico si esta habilitado.
+    WALed::setState(state);
   }
 
 
-  // NUEVA FUNCION: FUENTE DE PH
+
+  
+  // FUENTE Y VALIDACION DE PH
   void applyPhSource(WA::Readings& r) {
 
-    // Mantener el pH simulado
+    // En modo MOCK mantenemos los valores
+    // generados por mock_sensors.cpp.
     if (!WAConfig::USE_REAL_PH) {
       return;
     }
 
-    // Obtener voltaje desde ADC1
+    // Obtener voltaje desde el ADC.
     WAPh::RawReading raw = WAPh::read();
 
-    // Todavia no tenemos calibracion real
-    r.ph =
-      std::numeric_limits<float>::quiet_NaN();
+    // Todavia NO existe un modelo de
+    // calibracion obtenido del sensor real.
+    const WAPhCalibration::Calibration model{
+      0.0,
+      0.0,
+      false
+    };
 
-    r.ph_sensor_ok = false;
-    r.calibrated = false;
+    // No tenemos validacion fisica.
+    // NO cambiar estos valores a true
+    // sin completar las pruebas reales.
+    const WAPhPipeline::Evidence evidence{
+      false,  // Senal no validada
+      false   // Calibracion no verificada
+    };
 
+    // Procesar la muestra.
+    WAPhPipeline::Reading result =
+      WAPhPipeline::process(
+        static_cast<double>(raw.adcMillivolts),
+        raw.acquired,
+        model,
+        evidence
+      );
+
+    // Actualizar datos del controlador.
+    r.ph = result.ph;
+    r.ph_sensor_ok = result.ph_sensor_ok;
+    r.calibrated = result.calibrated;
+
+    // Diagnostico para desarrollo.
     if (raw.acquired) {
 
       Serial.print("[PH ADC] ");
       Serial.print(raw.adcMillivolts);
-      Serial.println(" mV - sin calibrar");
+      Serial.println(" mV");
 
     } else {
 
       Serial.println(
-        "[PH ADC] Adquisicion no disponible"
+        "[PH ADC] Lectura no disponible"
+      );
+    }
+
+    if (!result.calibrated) {
+
+      Serial.println(
+        "[PH] Medicion no validada"
       );
     }
   }
+
 
 } // FIN DEL NAMESPACE ANONIMO
 
@@ -81,11 +122,16 @@ namespace WAController {
 
     currentReadings = WAMock::read(0);
 
+    
     // Inicializar sensor de temperatura
     WATemperature::begin();
 
     // Inicializar sensor de pH
     WAPh::begin();
+
+    // Inicializar controlador LED RGB
+    WALed::begin();
+
 
     // Aplicar temperatura real si corresponde
     if (WAConfig::USE_REAL_TEMPERATURE) {

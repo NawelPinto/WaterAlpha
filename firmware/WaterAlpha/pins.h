@@ -25,6 +25,17 @@ namespace WAPins {
   constexpr int PIN_LED_G = -1;
   constexpr int PIN_LED_B = -1;
 
+  
+  // Tipo de LED por confirmar.
+  constexpr bool LED_TYPE_CONFIRMED = false;
+
+  // Valor provisional, NO habilitar hardware
+  // hasta conocer el tipo de LED.
+  // true: anodo comun
+  // false: catodo comun
+  constexpr bool LED_COMMON_ANODE = false;
+
+
   // Seguridad: no activar hardware todavía
   constexpr bool PINOUT_CONFIRMED = false;
 

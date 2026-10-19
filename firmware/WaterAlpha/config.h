@@ -9,6 +9,22 @@
 namespace WAConfig {
 
   
+  // LED RGB fisico
+  // false: solo simulacion por Serial
+  // true: habilitar salidas PWM
+  constexpr bool USE_REAL_LED = false;
+
+  // Frecuencia PWM
+  constexpr uint32_t LED_PWM_FREQUENCY = 1000;
+
+  // Resolucion PWM: 8 bits
+  constexpr uint8_t LED_PWM_BITS = 8;
+
+  // Brillo preliminar (0 a 255)
+  constexpr uint8_t LED_BRIGHTNESS = 96;
+
+
+  
   // Fuente de mediciones de pH
   // false: simulacion
   // true: adquirir desde el ADC1
