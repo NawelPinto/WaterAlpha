@@ -8,6 +8,21 @@
 
 namespace WAConfig {
 
+  
+  // Fuente de mediciones de pH
+  // false: simulacion
+  // true: adquirir desde el ADC1
+  constexpr bool USE_REAL_PH = false;
+
+  // Fuente de temperatura
+  // false: simulada
+  // true: DS18B20 fisico
+  constexpr bool USE_REAL_TEMPERATURE = false;
+
+  // Tiempo maximo de conversion a 12 bits
+  constexpr uint32_t TEMP_CONVERSION_MS = 750;
+
+
   // Periodo de actualización del sistema
   constexpr uint32_t SAMPLE_PERIOD_MS = 1000;
   
