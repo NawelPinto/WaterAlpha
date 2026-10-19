@@ -9,7 +9,7 @@
 
 window.WaterAlphaConfig = Object.freeze({
   // Modo de funcionamiento 
-  API_MODE: "MOCK",
+  API_MODE: "REAL",
  
   // Actualización de mediciones
   API_REFRESH_MS: 1500,

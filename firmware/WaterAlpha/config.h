@@ -2,11 +2,22 @@
 #ifndef WATERALPHA_CONFIG_H
 #define WATERALPHA_CONFIG_H
 
-#include <Arduino.h>
+#include <stdint.h>
 
 // WATERALPHA - CONFIGURACIÓN ALPHA
 
 namespace WAConfig {
+
+  // Periodo de actualización del sistema
+  constexpr uint32_t SAMPLE_PERIOD_MS = 1000;
+  
+  // Límites para detectar lecturas imposibles
+  constexpr float PH_PHYSICAL_MIN = 0.0f;
+  constexpr float PH_PHYSICAL_MAX = 14.0f;
+
+  // Rango nominal del DS18B20
+  constexpr float TEMP_SENSOR_MIN = -55.0f;
+  constexpr float TEMP_SENSOR_MAX = 125.0f;
 
   // Nombre de la red creada por el ESP32
   constexpr char WIFI_SSID[] = "WaterAlpha";

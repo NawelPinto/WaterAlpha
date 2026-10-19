@@ -1,7 +1,8 @@
+#include "controller.h"
+#include <cmath>
 #include <LittleFS.h>
 #include <Arduino.h>
 #include <WebServer.h>
-
 #include "config.h"
 #include "web_server.h"
 
@@ -68,25 +69,81 @@ void handleRoot() {
 }
 
 // Endpoint de mediciones simuladas
+
 void handleReadings() {
 
-  const char* json = R"json(
-{
-  "schema_version": 1,
-  "mode": "MOCK",
-  "temperature": 17.8,
-  "ph": 7.2,
-  "state": "GREEN",
-  "stable": true,
-  "temperature_sensor_ok": true,
-  "ph_sensor_ok": true,
-  "calibrated": true,
-  "reading_valid": true,
-  "sample_age_ms": 0,
-  "message": "El pH esta dentro de la referencia preliminar.",
-  "warning": "Evaluacion preliminar. No certifica potabilidad ni ausencia de patogenos."
-}
-  )json";
+  // Obtener la última decisión calculada
+  WAController::Snapshot s =
+    WAController::snapshot();
+
+  const WA::Readings& r = s.readings;
+
+  // Verificar disponibilidad de mediciones
+  bool phAvailable =
+    r.ph_sensor_ok &&
+    r.calibrated &&
+    std::isfinite(r.ph) &&
+    r.ph >= WAConfig::PH_PHYSICAL_MIN &&
+    r.ph <= WAConfig::PH_PHYSICAL_MAX;
+
+  bool tempAvailable =
+    r.temperature_sensor_ok &&
+    std::isfinite(r.temperature) &&
+    r.temperature >= WAConfig::TEMP_SENSOR_MIN &&
+    r.temperature <= WAConfig::TEMP_SENSOR_MAX;
+
+
+  auto asBool = [](bool value) {
+    return value ? "true" : "false";
+  };
+
+  // Construir respuesta JSON
+  String json;
+  json.reserve(600);
+
+  json += "{\"schema_version\":1,";
+  json += "\"mode\":\"MOCK\",";
+
+  json += "\"temperature\":";
+  json += tempAvailable
+    ? String(r.temperature, 1) : "null";
+
+  json += ",\"ph\":";
+  json += phAvailable
+    ? String(r.ph, 2) : "null";
+
+  json += ",\"state\":\"";
+  json += WA::stateName(s.decision.state);
+  json += "\"";
+
+  json += ",\"stable\":";
+  json += asBool(r.stable);
+
+  json += ",\"temperature_sensor_ok\":";
+  json += asBool(r.temperature_sensor_ok);
+
+  json += ",\"ph_sensor_ok\":";
+  json += asBool(r.ph_sensor_ok);
+
+  json += ",\"calibrated\":";
+  json += asBool(r.calibrated);
+
+  json += ",\"reading_valid\":";
+  json += asBool(s.decision.reading_valid);
+
+  json += ",\"sample_age_ms\":";
+  json += String(s.sample_age_ms);
+
+  json += ",\"message\":\"";
+  json += s.decision.message;
+  json += "\"";
+
+  json += ",\"warning\":\"";
+  json += "Evaluacion preliminar. ";
+  json += "No certifica potabilidad ni ";
+  json += "ausencia de patogenos.\"";
+
+  json += "}";
 
   server.send(
     200,
@@ -94,6 +151,7 @@ void handleReadings() {
     json
   );
 }
+
 
 // Activar rutas y servidor
 void startWaterAlphaServer() {

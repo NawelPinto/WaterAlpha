@@ -8,9 +8,9 @@
  * Sensores simulados
  */
 
+ #include "controller.h"
 #include <Arduino.h>
 #include <WiFi.h>
-
 #include "config.h"
 #include "web_server.h"
 
@@ -23,6 +23,7 @@ void setup() {
 
   Serial.println();
   Serial.println("[BOOT] WaterAlpha v0.1");
+  WAController::begin();
 
   // Activar modo punto de acceso
   WiFi.mode(WIFI_AP);
@@ -55,11 +56,17 @@ void setup() {
 }
 
 // Se ejecuta repetidamente
+
 void loop() {
 
+  // Actualizar mediciones y máquina de estados
+  WAController::update();
+
+  // Atender solicitudes HTTP
   if (serverReady) {
     updateWaterAlphaServer();
   }
 
   delay(2);
 }
+

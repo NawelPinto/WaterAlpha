@@ -1,0 +1,14 @@
+
+# Ejecutables generados durante las pruebas
+tests/*.exe
+
+# Imagen LittleFS generada
+firmware/WaterAlpha/mklittlefs.bin
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Archivos temporales de Windows
+Thumbs.db
+Desktop.ini
