@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>WaterAlpha | Evaluación de agua</title>
+
+  <!-- Conexión con nuestro archivo CSS -->
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script>
+  <script src="mock.js" defer></script>
+  <script src="state_machine.js" defer></script>
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+ 
+</head>
+
+<body>
+
+  <main class="dashboard">
+
+    <!-- ENCABEZADO -->
+    <header class="header">
+      <span class="brand">WATER<span>ALPHA</span></span>
+      <p>Evaluación preliminar de agua</p>
+      <span id="mode-badge" class="mode">MODO SIMULACIÓN</span>
+    </header>
+
+    <!-- ESTADO PRINCIPAL -->
+    <section class="status-card">
+      <div id="status-light" class="status-light blue"></div>
+
+      <h1 id="status-title">Inicializando</h1>
+
+      <p id="status-message">
+        Esperando mediciones...
+      </p>
+    </section>
+
+    <!-- MEDICIONES -->
+    <section class="measurements">
+
+      <article class="measurement-card">
+        <h2>pH</h2>
+        <p id="ph-value" class="value">--</p>
+        <span>Escala de pH</span>
+      </article>
+
+      <article class="measurement-card">
+        <h2>Temperatura</h2>
+        <p id="temperature-value" class="value">--</p>
+        <span>Grados Celsius (°C)</span>
+      </article>
+
+    </section>
+
+    <!-- DIAGNÓSTICO -->
+    <section class="diagnostics">
+      <h2>Estado del sistema</h2>
+
+      <p id="ph-sensor-status">○ Sensor de pH: pendiente</p>
+      <p id="temperature-sensor-status">○ Sensor de temperatura: pendiente</p>
+      <p id="stability-status">○ Estabilidad: pendiente</p>
+      <p id="calibration-status">○ Calibración: pendiente</p>
+    </section>
+
+    
+<!-- PANEL DE SIMULACIÓN -->
+<section class="simulator">
+
+  <h2>Simulador de sensores</h2>
+
+  <p class="simulator-description">
+    Modifica las lecturas y condiciones del sistema.
+    Datos ficticios para desarrollo.
+  </p>
+
+  <!-- Control de pH -->
+  <div class="control">
+    <label for="ph-input">
+      pH simulado:
+      <output id="ph-slider-value">7.20</output>
+    </label>
+
+    <input
+      type="range"
+      id="ph-input"
+      min="0"
+      max="14"
+      step="0.05"
+      value="7.2"
+    >
+  </div>
+
+  <!-- Control de temperatura -->
+  <div class="control">
+    <label for="temperature-input">
+      Temperatura simulada:
+      <output id="temperature-slider-value">17.8 °C</output>
+    </label>
+
+    <input
+      type="range"
+      id="temperature-input"
+      min="-10"
+      max="50"
+      step="0.1"
+      value="17.8"
+    >
+  </div>
+
+  <!-- Condiciones del sistema -->
+  <div class="mock-flags">
+
+    <label>
+      <input type="checkbox" id="ph-connected" checked>
+      Sensor pH conectado
+    </label>
+
+    <label>
+      <input type="checkbox" id="temperature-connected" checked>
+      Sensor temperatura conectado
+    </label>
+
+    <label>
+      <input type="checkbox" id="stable-input" checked>
+      Lectura estable
+    </label>
+
+    <label>
+      <input type="checkbox" id="calibrated-input" checked>
+      Calibración válida
+    </label>
+    
+    <label>
+      <input type="checkbox" id="initializing-input">
+      Sistema inicializando
+    </label>
+
+
+  </div>
+
+</section>
+
+
+<!-- INSPECTOR DE API -->
+<details class="api-debug">
+
+  <summary>
+    Datos recibidos de la API (JSON)
+  </summary>
+
+  <pre id="json-preview">Esperando respuesta...</pre>
+
+</details>
+
+
+    <!-- ADVERTENCIA -->
+    <footer class="warning">
+      <strong>Importante</strong>
+      <p>
+        Evaluación preliminar. No certifica potabilidad
+        ni ausencia de patógenos.
+      </p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
