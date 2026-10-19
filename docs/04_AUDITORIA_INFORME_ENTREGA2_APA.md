@@ -1,9 +1,5 @@
 # Auditoría especializada — Informe de Entrega 2 bajo instructivo APA
 
-**Asignatura:** TEI201, Taller de Diseño en Ingeniería, Universidad Adolfo Ibáñez.  
-**Documento de máxima autoridad para este apartado:** `Instructivo_Entrega_2_Informe_APA.docx`.  
-**Plantilla:** `Plantilla_Entrega_2_APA.docx`.  
-**Estado:** pauta de redacción y auditoría de conformidad; **aún no se auditó el manuscrito final del equipo**.
 
 ## 1. Requisitos formales obligatorios
 
@@ -27,9 +23,6 @@ El instructivo propone una distribución orientativa de **5 páginas** y a la ve
 
 ## 2. Estructura requerida y contenido específico WaterAlpha
 
-### Título y autores
-
-Título sugerido: **«WaterAlpha: diseño e implementación Alpha de un dispositivo portátil de evaluación preliminar de pH y temperatura de agua con interfaz web local»**. Ajustar si la versión entregada todavía se limita a simulación. Debajo indicar todos los integrantes, TEI201 y UAI conforme a plantilla. No inventar nombres.
 
 ### Resumen (150–200 palabras)
 
@@ -169,12 +162,3 @@ Decisión: APROBADO / FALLIDO / PENDIENTE
 - [ ] Declaración de IA, código externo y bibliotecas.
 - [ ] PDF final abierto y revisado visualmente por el equipo.
 
-## 9. Fuentes examinadas
-
-- `Instructivo_Entrega_2_Informe_APA.docx`: §1–9, tablas de extensión y rúbrica.
-- `Plantilla_Entrega_2_APA.docx`: estructura desde título hasta anexo E.
-- `avance_02_estudiantes.pdf`: requisitos de demo para contrastar lo que debe haber ocurrido físicamente.
-- `Base teórica y técnica para la Entrega 2...pdf`: alcance preliminar, sensores, CAD y referencias **a validar**.
-- Clases TEI201 electrónica y CAD, y desarrollo WaterAlpha comunicado por el equipo.
-
-**Relacionados:** [Matriz de evidencias](06_MATRIZ_TRAZABILIDAD_Y_EVIDENCIAS.md) · [Auditoría general](01_AUDITORIA_GENERAL_WATERALPHA.md) · [PPT y demo](02_AUDITORIA_PRESENTACION_PPT_Y_DEMO.md).

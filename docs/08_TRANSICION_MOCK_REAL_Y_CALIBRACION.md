@@ -1,19 +1,3 @@
-# WaterAlpha - Transicion segura de MOCK a REAL
-
-**Estado:** guia de implementacion pendiente de ensayos fisicos. Este paquete se preparo a partir de la arquitectura conversada; comprobar correspondencia con el repositorio local antes de reemplazar archivos. No acredita funcionamiento en hardware.
-
-**Alcance:** ESP32 clasico en placa UAI por confirmar, DS18B20, AFEL analogico y website HTTP. LED RGB fisico NO disponible: permanece desactivado. La maquina de estados y el website no necesitan el LED.
-
-> Evaluacion preliminar. No certifica potabilidad ni ausencia de patogenos.
-
-## 1. Archivos del paquete
-
-- `firmware/WaterAlpha/controller.cpp`: **reemplazo completo** de la version previa, evitando `WAMock::read` en el modo REAL.
-- `firmware/WaterAlpha/ph_field_data.h`: **nuevo**. Contiene todos los parametros numericos medidos y las confirmaciones de ensayo. Comienza sin datos validos (sentinelas `-1.0` y banderas `false`).
-- `docs/08_TRANSICION_MOCK_REAL_Y_CALIBRACION.md`: esta guia.
-- `docs/09_REGISTRO_MUESTRAS_CALIBRACION.csv`: hoja inicial para copiar las lecturas.
-
-Copia estos archivos conservando la ruta relativa al repositorio `C:\Dev\WaterAlpha`. **Realiza commit o copia de seguridad antes de sustituir `controller.cpp`.**
 
 ## 2. Cambios manuales adicionales obligatorios
 

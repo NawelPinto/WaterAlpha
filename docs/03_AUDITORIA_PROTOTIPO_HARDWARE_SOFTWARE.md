@@ -1,52 +1,39 @@
 # Auditoría especializada — Construcción física y funcionamiento WaterAlpha
 
-**Objetivo:** pauta técnica reproducible para convertir el software preparado en prototipo Alpha IoT, incluyendo cableado, adquisición, firmware, calibración, fallos y evidencia.  
-**Fecha de corte:** 18-10-2026.  
-**Advertencia:** sin placa ni hardware no existe demostración de mediciones reales; esta guía es **plan de implementación**, no esquema construido.  
-**Documentos relacionados:** [Auditoría general](01_AUDITORIA_GENERAL_WATERALPHA.md) · [Protocolo de evidencias](06_MATRIZ_TRAZABILIDAD_Y_EVIDENCIAS.md) · `06_mapa_electronico.md` / `07_protocolo_pruebas.md` del proyecto.
-
 ## 1. Requisitos de diseño y alcance Alpha
 
-**Uso previsto:** senderistas que analizan una muestra de agua natural de manera **preliminar**. **No** consumo, certificación sanitaria ni detección de agentes microbiológicos. Subconjunto Alpha: temperatura °C y pH, alerta LED RGB, datos web offline. Conductividad eléctrica y turbidez quedan como expansión futura (no afirmar integradas).
 
-**Arquitectura de referencia:**
-
-```text
-Agua y sondas en zona húmeda
-   ├─ DS18B20 sumergible ─(1-Wire, pull-up a 3V3)──────────┐
-   └─ sonda pH ─ módulo acondicionador AFEL ─ adaptación ──┤
-                                          (ADC1)           ↓
-                    Placa UAI con ESP-32S, área seca
-                    WAMock o fuentes reales
-                    → WAController / Snapshot
-                    → WA::StateMachine
-                          ├── WALed / LED RGB
-                          └── HTTP GET /api/readings
-                                      ↑
-                            Wi-Fi SoftAP «WaterAlpha»
-                                      ↑
-                             navegador del usuario
-```
 
 ### 1.1 Lista de materiales (BOM preliminar, sin inventar cantidades confirmadas)
 
 | Material | Existencia | Propósito / decisión pendiente |
-|---|---|---|
-| Placa personalizada UAI + módulo Ai-Thinker ESP-32S | **No disponible todavía** | Medir PCB; obtener esquema y pinout, Flash, USB, reguladores y GPIO libres |
-| Cable USB de datos + fuente USB 5 V adecuada | Por confirmar | Alimentación inicial de laboratorio, no asumir LiPo integrada |
-| Sonda encapsulada DS18B20 + cable | Por confirmar | Medición °C; verificar fabricante, tres conductores y longitud |
-| Resistencia pull-up ~4,7 kΩ | Por confirmar | Entre DQ y 3V3 de DS18B20; revisar presencia previa en módulo |
-| Electrodo + placa pH analógica AFEL | Por confirmar | Registrar referencia, foto de ambos lados, tensión nominal, bornes y BNC |
-| Resistencias de divisor/adaptador + multímetro | Por confirmar | Proteger ADC; dimensionar al observar rango e impedancias |
-| LED RGB 4-terminales o módulo | Por confirmar | Confirmar común ánodo/cátodo y corriente admitida |
-| Tres resistencias limitadoras LED | Por calcular | Una por color si LED discreto; valorar driver según corriente |
-| Protoboard/cables, conectores, protección | Por confirmar | Ensayos secos, sin sonda sumergida sobre circuito expuesto |
-| Buffer pH 4,00, 7,00 (y opcional 10,00); agua de enjuague | Por confirmar | Calibración y verificación, según rango esperado y sensor elegido |
-| Termómetro de referencia | Por confirmar | Comparación DS18B20 a condiciones registradas |
-| Recipiente o cámara de muestra, juntas/pasamuros | CAD existente reportado; piezas reales pendientes | Húmedo/seco, limpieza, cableado y mantenimiento |
-| Computador Windows con Arduino IDE, VS Code, Python | Disponible en desarrollo | Compilar, grabar firmware y obtener logs |
 
-**No afirmar IP67, autonomía, masa ni compatibilidad CAD validada** antes de medir y ensayar. Los ~Ø80 × 175–185 mm y cámara 100–130 mL son sugerencias del estudio previo, no cotas observadas del modelo real.
+| Placa personalizada UAI + módulo Ai-Thinker ESP-32S | Medir PCB; obtener esquema y pinout, Flash, USB, reguladores y GPIO libres |
+
+| Cable USB de datos + fuente USB 5 V adecuada | Alimentación inicial de laboratorio, no asumir LiPo integrada |
+
+| Sonda encapsulada DS18B20 + cable | Medición °C; verificar fabricante, tres conductores y longitud |
+
+| Resistencia pull-up ~4,7 kΩ | Entre DQ y 3V3 de DS18B20; revisar presencia previa en módulo |
+
+| Electrodo + placa pH analógica AFEL | Registrar referencia, foto de ambos lados, tensión nominal, bornes y BNC |
+
+| Resistencias de divisor/adaptador + multímetro | Proteger ADC; dimensionar al observar rango e impedancias |
+
+| LED RGB 4-terminales o módulo | Confirmar común ánodo/cátodo y corriente admitida |
+
+| Tres resistencias limitadoras LED | Una por color si LED discreto; valorar driver según corriente |
+
+| Protoboard/cables, conectores, protección  | Ensayos secos, sin sonda sumergida sobre circuito expuesto |
+
+| Buffer pH 4,00, 7,00 (y opcional 10,00); agua de enjuague | Calibración y verificación, según rango esperado y sensor elegido |
+
+| Termómetro de referencia | Comparación DS18B20 a condiciones registradas |
+
+| Recipiente o cámara de muestra, juntas/pasamuros | CAD existente reportado; piezas reales pendientes | Húmedo/seco, limpieza, cableado y mantenimiento |
+
+| Computador Windows con Arduino IDE, VS Code, Python | Compilar, grabar firmware y obtener logs |
+
 
 ## 2. Gate de seguridad eléctrica previo a cablear
 
@@ -169,8 +156,6 @@ si 6,5–6,6 o 8,4–8,5 → YELLOW
 resto → GREEN (sin anomalía preliminar)
 ```
 
-Valores de pH y bandas son **provisionales de diseño**, no dictamen normativo. Temperatura contextual y condición de validez, no «temperatura de potabilidad». Histeresis usa memoria de `Anomaly` entre muestras.
-
 ### Contrato HTTP v1 esperado
 
 ```json
@@ -213,11 +198,10 @@ Valores de pH y bandas son **provisionales de diseño**, no dictamen normativo. 
 | HW-06 | Sistema integrado ≥5 min | video/log continuo + datos sin interrupciones | P/B |
 | MEC-01 | Ensamble/estanqueidad/mantenimiento | fotos, medidas y ensayo acordado | P/B |
 
-**Criterios metrológicos numéricos pendientes:** establecer antes del ensayo y de acuerdo con las especificaciones exactas, sensibilidad y necesidades de la entrega. No inventar una precisión.
+
 
 ## 7. Riesgos técnicos detectados (no ocultarlos)
 
-- **Construcción física aún no comenzada:** «software listo» no es «Alpha funcional» conforme a Avance #2.
 - **Pinout UAI desconocido:** no habilitar GPIO `-1`, ni instalar por conjetura divisores/LED.
 - **Módulo AFEL específico sin ficha/medición:** no extrapolar exactitud o rango de DFRobot.
 - **Falta de persistencia/calibración verificada en firmware:** en `applyPhSource` el modelo es inválido y el `Evidence` es falso; activar modo físico de pH debería producir MAGENTA hasta completar esta función.
@@ -225,15 +209,5 @@ Valores de pH y bandas son **provisionales de diseño**, no dictamen normativo. 
 - **Estabilidad:** la FSM recibe `stable` desde MOCK; todavía debe definirse algoritmo basado en serie de mediciones reales (media/mediana/dispersión, ventana, tiempo de estabilización).
 - **Estrategia de error:** al perder medición mientras estaba RED, estudiar si mostrar MAGENTA con histórico de anomalía y no borrar información de riesgo. El orden actual muestra YELLOW en inestable y conserva memoria de anomalía.
 - **API:** `sample_age_ms` necesita umbral máximo de dato obsoleto y gestión de reconexión; revisar caché/errores HTTP y validación JSON.
-- **LED 6.7:** compilar e integrar con core 3.x y confirmar cinco casos; MAGENTA fijo vs parpadeante en UI.
-- **Mecánica:** la base de referencia propone dimensiones y O-rings, pero no prueba sellado, masa, tolerancias ni compatibilidad con PCB real.
 
-## 8. Recomendación de orden de desarrollo restante
 
-**Ahora sin placa:** congelar versiones y pruebas; completar registro de dependencias, BOM, plano de banco, esquema a completar, CAD parametrizado con dimensiones conocidas de componentes; preparar buffers, referencia y equipo; confirmar objeto real con docente.  
-**Cuando llegue placa:** E1 → H1 → H2 → H3 → H4 → H5 → H6. No intentar conectar todo y corregir a la vez.  
-**Antes de entrega:** generar logs, fotos y video de medición → decisión → LED + web; mantener versión de firmware y CAD coherente.
-
-## 9. Fuentes base
-
-`Clase_TEI201_Sistemas_Electronicos_Control.pptx` (diapositivas sobre arquitectura, ADC, potencia, validación); `TEI201_Clase_5_Diseno_CAD_Fusion360.pptx` (parámetros, interferencias, fabricación); `Base teórica y técnica...pdf` (pp. 1–13 como propuesta, no dato empírico del equipo); `avance_02_estudiantes.pdf` (pp. 2–8); documentación técnica de la conversación WaterAlpha. **Verificar la ficha del modelo AFEL/DS18B20 adquirido y del ESP32 UAI al disponer de componentes.**

@@ -1,34 +1,19 @@
 # Auditoría y guion de videotutorial — Replicar WaterAlpha desde GitHub
 
-**Audiencia:** integrante nuevo o persona que trabaja desde otro computador Windows; sección adicional para cargarlo luego en **otro ESP32 físico**.  
-**Estado del proyecto:** desarrollo sin hardware concluido en buena parte; el despliegue en ESP32 real y la calibración física **no están probados**.  
-**Versión del tutorial:** 1.0, 18-10-2026.  
-**Objetivo:** reproducir el entorno, clonar el mismo commit, instalar dependencias, probar frontend, C++, API HTTP, firmware Arduino y LittleFS; no afirmar ejecución física hasta realizarla.
 
-## 0. Antes de grabar: preparar lo que se mostrará
 
-- [ ] Obtener URL del repositorio **real** `WaterAlpha` en GitHub y confirmar permisos de acceso. No se dispone de esa URL en esta auditoría; usar `[URL_REPO]` como marcador.
-- [ ] Confirmar el `commit` que se desea replicar (`git log -1 --oneline` o History de GitHub Desktop) y anotar **hash**. Grabar el mismo commit de principio a fin; no editar el código sin crear nuevo commit.
-- [ ] Comprobar árbol real y nombres idénticos a lo documentado; `docs/` puede contener archivos adicionales.
-- [ ] Crear carpeta `evidencias/tutorial/` o ubicación equivalente (si se incorpora al repo, revisar tamaño y privacidad). No subir ejecutables generados ni claves reales.
-- [ ] Disponer de conexión a Internet para **instalación inicial** de programas, Arduino core y librerías; durante ejecución final el SoftAP no necesita Internet.
-- [ ] Mostrar rutas de ejemplo en Windows; `C:\Dev\WaterAlpha` es la ruta de la máquina original, **no requisito**.
 
 ## 1. Instalaciones: cuadro completo
 
-| Componente | Necesario para | Instalación/verificación | Observación |
-|---|---|---|---|
-| **GitHub Desktop** | Clonar, commits y push | Sitio oficial `https://desktop.github.com/`; iniciar sesión y clonar | Usar repo privado si corresponde; **Fetch** no equivale a **Push** |
-| **Visual Studio Code** | Edición de HTML/CSS/JS/C++/Python/Markdown | `https://code.visualstudio.com/`; abrir carpeta raíz | No es compilador Arduino; extensiones opcionales |
-| **Python 3** | Servidor local y API de prueba | `https://www.python.org/downloads/`; `python --version` | Comprobar PATH/alias de Windows |
-| **Arduino IDE 2** | Compilar/subir sketch ESP32 | `https://www.arduino.cc/en/software`; abrir `.ino` | Seleccionar target provisional `ESP32 Dev Module` solo mientras se verifica placa real |
+
+| **Visual Studio Code** | Edición de HTML/CSS/JS/C++/Python/Markdown | No es compilador Arduino; extensiones opcionales |
+| **Python 3** | Servidor local y API de prueba | Comprobar PATH/alias de Windows |
+| **Arduino IDE 2** | Compilar/subir sketch ESP32 | Seleccionar target provisional `ESP32 Dev Module` solo mientras se verifica placa real |
 | **Paquete ESP32 by Espressif Systems** | Core Arduino del ESP32 | URL del Gestor de tarjetas + buscar `esp32` | En log anterior figuraba `esp32 3.3.12`, pero **verificar** versión real de la nueva PC |
 | **OneWire** — Paul Stoffregen | DS18B20, bus digital | Gestor de bibliotecas Arduino | Instalar librería de autor correcto |
 | **DallasTemperature** — Miles Burton y colaboradores | Adquisición °C desde DS18B20 | Gestor de bibliotecas Arduino | Depende de OneWire |
-| **MSYS2 UCRT64 + GCC** | Tests unitarios `.exe` de Windows | `https://www.msys2.org/` y `pacman` | GCC de escritorio distinto del toolchain ESP32 |
-| **arduino-littlefs-upload** (`.vsix`) | Crear/cargar imagen LittleFS | `https://github.com/earlephilhower/arduino-littlefs-upload` | Guardar VSIX en `%USERPROFILE%\.arduinoIDE\plugins\` y reiniciar Arduino IDE |
-| **Navegador Chromium/Firefox** | Visualización de interfaz web | Navegador compatible con JS moderno | Evitar abrir HTML con `file://` para pruebas de API |
-| **Autodesk Fusion 360** (opcional para software; importante para CAD) | Abrir y revisar modelo 3D | Instalación bajo licencia académica correspondiente | Requiere enlace al CAD nativo del equipo; no se encontró archivo CAD adjunto |
+| **MSYS2 UCRT64 + GCC** | Tests unitarios `.exe` de Windows | GCC de escritorio distinto del toolchain ESP32 |
+| **arduino-littlefs-upload** (`.vsix`) | Crear/cargar imagen LittleFS | Guardar VSIX en `%USERPROFILE%\.arduinoIDE\plugins\` y reiniciar Arduino IDE |
 | **Multímetro + drivers USB-UART** (solo al recibir hardware) | Reconocer puerto COM y validar tensiones | Dependiente del chip USB/placa UAI | No instalar driver al azar; identificar puente USB-UART real |
 
 **ESP32 Boards Manager URL oficial utilizada en el desarrollo:**
@@ -112,8 +97,6 @@ Abrir `http://127.0.0.1:8000/`, mover sliders pH y temperatura, casillas sensor/
 
 **Explicar claramente los dos significados de REAL:**
 
-- `web/config.js` en MOCK = la web obtiene JSON de `window.waterAlphaMock`.
-- `firmware/WaterAlpha/data/config.js` en REAL = la web realiza `fetch('/api/readings')` vía HTTP.
 - El contenido de `mode:"MOCK"` en respuesta JSON = las mediciones proceden de una simulación, aunque HTTP sea una conexión real.
 - Los booleanos `USE_REAL_PH`, `USE_REAL_TEMPERATURE`, `USE_REAL_LED` en `firmware/WaterAlpha/config.h` controlan el **hardware físico** de cada subsistema (mantener falsos sin placa).
 
@@ -209,12 +192,7 @@ constexpr int PIN_LED_B = -1;
 
 6. Pulsar **✓ Verificar**. Guardar screenshot de resultado (flash/RAM, board/core). Compilar no verifica físicamente Wi-Fi ni sensores.
 
-**Dos errores de desarrollo que conviene mostrar en video como debugging real:**
 
-- `state_machine.h`: `enum class Anomaly { HIGH, LOW }` colisionaba con macros `HIGH/LOW` del core Arduino. Solución: `ABOVE_MAX`, `BELOW_MIN` en `.h` y `.cpp`.
-- `web_server.cpp`: estaba escrito `include <LittleFS.h>` sin `#`, generando cascada de errores C++; solución `#include <LittleFS.h>`.
-
-**También ocurrido:** `WaterAlpha.ino` se abrió inicialmente vacío en Arduino; verificar que el archivo y su copia en VS Code sean el mismo, guardado con `Ctrl+S`, cerrar/reabrir sketch si hay desfase.
 
 ## 7. Escena 6 — Preparar archivos LittleFS y generar imagen
 
@@ -281,21 +259,7 @@ Get-Item .\firmware\WaterAlpha\mklittlefs.bin
 | Archivo `.ino` parece vacío | Guardar VS Code, comprobar ruta idéntica y reabrir sketch |
 | GitHub Desktop dice `No local changes` | Todo comprometido localmente; confirmar también sincronización remota (`Fetch origin` vs `Push origin`) |
 
-## 11. Guion de grabación propuesto (20–30 min ajustables)
 
-| Minuto orientativo | Mostrar | Resultado observable |
-|---|---|---|
-| 0:00–1:30 | Alcance y advertencia | Qué hace/no hace WaterAlpha |
-| 1:30–4:30 | GitHub Desktop + clone + árbol | Código en máquina nueva |
-| 4:30–7:00 | Python + servidor 8000 | UI MOCK y controles |
-| 7:00–9:30 | Servidor 8001/API | JSON dinámico vía HTTP |
-| 9:30–13:00 | MSYS2/GCC + tests | Consolas de pruebas |
-| 13:00–18:00 | Arduino IDE + bibliotecas + ESP32 core | Compilación firmware |
-| 18:00–21:00 | Complemento LittleFS + Build | `mklittlefs.bin` generado |
-| 21:00–25:00 | Arquitectura, flags, FSM, calibración | Explicación técnica clara |
-| 25:00–27:00 | Preparación de placa, riesgos y pendientes | Honestidad sobre hardware físico |
-
-No publicar credenciales personales, URL privada sin autorización, token GitHub, claves definitivas, datos de usuarios ni imágenes de equipo sin consentimiento. Si se comparte el vídeo públicamente, usar repositorio de ejemplo o acceso controlado para material confidencial.
 
 ## 12. Lista de auditoría del tutorial
 
@@ -324,5 +288,14 @@ No publicar credenciales personales, URL privada sin autorización, token GitHub
 - DallasTemperature: https://github.com/milesburton/Arduino-Temperature-Control-Library
 - OneWire: https://github.com/PaulStoffregen/OneWire
 
-**Criterio:** documentación oficial y versiones comprobadas **en la instalación real**, no asumir que URL o interfaz permanece inmutable.  
-**Documentación complementaria:** [prototipo](03_AUDITORIA_PROTOTIPO_HARDWARE_SOFTWARE.md) · [matriz](06_MATRIZ_TRAZABILIDAD_Y_EVIDENCIAS.md) · [riesgos](07_REGISTRO_RIESGOS_Y_PENDIENTES.md).
+
+## 14. Recordatorio de que ajustar en el script
+- pins.h / Asignar los GPIO reales de la placa UAI / *esto es para cuando tengamos la luz led, por ahora dejar en "constexpr int PIN_LED_R = -1;"*
+- config.h / Habilitar sensores y LED físicos dejar desactivados / *Dejar como "constexpr bool USE_REAL_TEMPERATURE = true; constexpr bool USE_REAL_PH = true; constexpr bool USE_REAL_LED = false;"*
+- temperature_sensor.cpp / Comprobar lectura real del DS18B20 / *revisar en el JSON del website algo como "temperature = valor *lógico*" , y  "temperatura_Sensor_ok":true*
+- ph_sensor.cpp / Comprobar adquisición analógica del AFEL / *activar "constexpr bool USE_REAL_PH = true;"*
+- ph_calibration.cpp / Mantener el algoritmo y utilizar coeficientes medidos / 
+- controller.cpp / Reemplazar la simulación por adquisición y validación reales / *como el sensor de ph es analogico ,se convierte los voltajes dados en pH por ello, reemplazaremos en "WAPhCalibration::Calibration model = WAPhCalibration::fitTwoPoint()" con los valores reales entregados"* esto calculara a traves de una ecuacion, la cantidad de pH
+- web_server.cpp / Publicar el origen real de las mediciones en el JSON / *cambiar "json += "\"mode\":\"MOCK\",";" por "REAL"*
+- led_rgb.cpp / Activar la salida física después de verificar el circuito / *Esto es para cuando tengamos la luz LED*
+- firmware/WaterAlpha/data/config.js / Ya debería estar en API_MODE: "REAL" / 

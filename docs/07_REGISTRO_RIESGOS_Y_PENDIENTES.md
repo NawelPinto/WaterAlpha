@@ -1,46 +1,6 @@
 # Registro de riesgos, pendientes y plan de liberación — WaterAlpha
 
-**Universidad Adolfo Ibáñez · TEI201 · Fecha base 18-10-2026**  
-**Enfoque:** la evidencia manda: ante falta de medición, declarar pendiente; no fabricar un «APROBADO».  
-**Usar junto con:** [01 General](01_AUDITORIA_GENERAL_WATERALPHA.md), [03 Hardware](03_AUDITORIA_PROTOTIPO_HARDWARE_SOFTWARE.md), [06 Evidencias](06_MATRIZ_TRAZABILIDAD_Y_EVIDENCIAS.md).
-
-## 1. Escala usada
-
-- **Crítico:** afecta seguridad eléctrica, confiabilidad del veredicto, cumplimiento de demostración o integridad académica; impide afirmar funcionamiento real.
-- **Alto:** impide fabricar/replicar/evaluar un subsistema; debe resolverse antes de la demostración final.
-- **Medio:** puede causar fallos de mantenimiento, inconsistencia o debilidad de evidencia.
-- **Bajo:** mejora editorial/no bloqueante, sujeta a prioridades.
-
-Estados: **ABIERTO, EN CURSO, BLOQUEADO, RESUELTO CON EVIDENCIA**. No marcar resuelto por haber escrito código o planeado un ensayo.
-
-## 2. Riesgos y acciones correctivas
-
-| ID | Nivel | Riesgo/causa | Mitigación / criterio de cierre | Dependencia / estado |
-|---|---|---|---|---|
-| R-01 | **CRÍTICO** | Ausencia de placa UAI, sin ejecución real | Conseguir placa; confirmar pinout/revisión; grabar firmware y FS; log físico | Hardware; BLOQUEADO |
-| R-02 | **CRÍTICO** | Módulo AFEL de salida desconocida puede dañar ADC | Identificar modelo, medir tensión/polaridad/rango, acondicionar y verificar voltaje ADC | Sensor+multímetro; BLOQUEADO |
-| R-03 | **CRÍTICO** | pH físico no calibrado; inferencia de potabilidad injustificada | Buffers, regresión, punto independiente, error documentado; estado MAGENTA hasta aceptación | Sensor+patrones; BLOQUEADO |
-| R-04 | **CRÍTICO** | Pauta Avance #2 exige sensor–actuador–conectividad real y ≥5 min | Log/video de demo integral real; sin sustitución silenciosa por Python | Hardware; BLOQUEADO |
-| R-05 | **CRÍTICO** | False GREEN (agua etiquetada como segura) | Revisar UI/PPT/paper/LED; aviso de evaluación preliminar siempre visible | Revisión comunicacional; ABIERTO |
-| R-06 | **ALTO** | CAD declarado listo, pero no se vieron sus dimensiones ni BOM | Revisar Fusion nativo, interferencias, sección, acceso a BNC, masa y cierre | CAD+componentes; EN CURSO |
-| R-07 | **ALTO** | GPIO UAI y tipo LED no identificados | Esquemático UAI, tabla pines, selección PWM apta, resistencias/driver, pruebas | Placa+LED; BLOQUEADO |
-| R-08 | **ALTO** | Falta estabilidad/rango de señal pH en lectura real | Definir filtrado, ventana y criterio de estabilidad; verificar ruido y outliers | Hardware; BLOQUEADO |
-| R-09 | **ALTO** | Flags de evidencias pH hardcoded false y calibración no persistente | Flujo de calibración, NVS/versionado, carga y revalidación; test reset/rearranque | Diseño de firmware+hardware; ABIERTO |
-| R-10 | **ALTO** | LittleFS compilado pero no subido a placa | Confirmar capacidad Flash, partición, upload y GET rutas reales | ESP32; BLOQUEADO |
-| R-11 | **ALTO** | Informe y PPT todavía no verificados | Crear material, ensayar, aplicar rúbricas, revisiones cruzadas, export final | Equipo; ABIERTO |
-| R-12 | **ALTO** | No existen datos metrológicos para justificar precisión | Diseñar criterio previo, referencia independiente, repeticiones e incertidumbre | Laboratorio; BLOQUEADO |
-| R-13 | **MEDIO** | Doble carpeta `web/` y `data/` divergen | Script/validación de copia y sincronización; comparar hashes; regenerar FS | Software; ABIERTO |
-| R-14 | **MEDIO** | `sample_age_ms` no desencadena falla por dato viejo | Definir timeout de muestra y pruebas desconexión, no usar valor viejo como actual | Software; ABIERTO |
-| R-15 | **MEDIO** | `state_machine.js` y C++ pueden divergir | Suite compartida de casos límite y comparación de contrato | Software; ABIERTO |
-| R-16 | **MEDIO** | Los tests fueron reportados pero no existe evidencia de todas las salidas | Guardar consola, código, compilador, commit y esperados | Equipo; EN CURSO |
-| R-17 | **MEDIO** | Versión/instalación poco reproducible en otra PC | Seguir tutorial 05 desde clone limpio con capturas; registrar versiones | Equipo; ABIERTO |
-| R-18 | **MEDIO** | Magenta parpadea en web pero físico puede ser fijo | Decidir requisito, implementar temporización no bloqueante y verificar paridad | LED hardware; ABIERTO |
-| R-19 | **MEDIO** | Sonda pH no responde y ADC aun entrega número plausible | Diseñar diagnóstico con mediciones controladas, evitar `acquired == connected` | Laboratorio; BLOQUEADO |
-| R-20 | **MEDIO** | Prototipo mojado, USB o conectores expuestos | Separación húmedo/seco, juntas/pasamuros, pruebas seguridad y mantenimiento | Mecánica; BLOQUEADO |
-| R-21 | **MEDIO** | Fecha/pauta de Avance #2 diferente de Entrega 2 | Confirmar horario, forma de PPT y criterios vigentes con docente | Docente; ABIERTO |
-| R-22 | **BAJO** | Lenguaje y logs parciales sin acentos / estilos inconsistentes | Normalizar mensajes y versiones, mantener JSON válido | Software editorial; ABIERTO |
-
-## 3. Dependencias que bloquean las pruebas físicas
+## 1. Dependencias que bloquean las pruebas físicas
 
 **Cadena crítica (no alterar orden):**
 
@@ -61,21 +21,8 @@ Recibir placa UAI y sensores reales
 
 **Puntos que sí se pueden completar ahora:** slides de presentación, auditoría del CAD, modelo del circuito provisional, lista de compra, criterios de prueba, vídeo de instalación de software en otro computador, freeze de commit, evidencias de tests y documentación APA de resultados sintéticos.
 
-## 4. Próximo sprint sin hardware — decisiones y entregables
 
-| Prioridad | Acción | Evidencia de cierre | Responsable | Fecha |
-|---|---|---|---|---|
-| 1 | Verificar última compilación Arduino tras Bloque 6.7 + 5 tests LED | Captura salida/versión/commit | [POR COMPLETAR] | [POR COMPLETAR] |
-| 2 | Clonar en otra PC o entorno limpio y seguir tutorial 05 | Video + hashes y log tests | [POR COMPLETAR] | [POR COMPLETAR] |
-| 3 | Medir en Fusion cotas y volumen útil del CAD propio | Capturas dimensiones y sección con fecha | [POR COMPLETAR] | [POR COMPLETAR] |
-| 4 | Contactar responsable técnico de placa UAI para conseguir pinout | Foto/pinmap/esquema oficial y revisión de placa | [POR COMPLETAR] | [POR COMPLETAR] |
-| 5 | Conseguir referencia exacta/ficha del AFEL y DS18B20 | Datasheets guardados y fotos/modelo | [POR COMPLETAR] | [POR COMPLETAR] |
-| 6 | Completar BOM con costos locales y equipo de calibración | Lista cantidades, proveedores y disponibilidad | [POR COMPLETAR] | [POR COMPLETAR] |
-| 7 | Preparar PPT 5–6 láminas y guion de demo honesto | Primer PPT y tiempos de ensayo | [POR COMPLETAR] | [POR COMPLETAR] |
-| 8 | Estructurar manuscrito con datos actuales y límites | Primera versión siguiendo plantilla APA | [POR COMPLETAR] | [POR COMPLETAR] |
-| 9 | Confirmar con docente PPT/plazo y aceptación de simulación temporal | Correo/Teams confirmado, no suposición | [POR COMPLETAR] | [POR COMPLETAR] |
-
-## 5. Criterios de liberación por hito
+## 2. Criterios de liberación por hito
 
 ### Liberación L0: paquete documental (sin placa)
 
