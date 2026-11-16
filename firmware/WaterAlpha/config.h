@@ -28,7 +28,7 @@ namespace WAConfig {
   // Fuente de mediciones de pH
   // false: simulacion
   // true: adquirir desde el ADC1
-  constexpr bool USE_REAL_PH = false;
+  constexpr bool USE_REAL_PH = true;
 
   // Fuente de temperatura
   // false: simulada
@@ -71,7 +71,7 @@ namespace WAConfig {
   constexpr float PH_HYSTERESIS = 0.1f;
 
   // El firmware aún utilizará valores simulados
-  constexpr bool MOCK_MODE = true;
+  constexpr bool MOCK_MODE = false;
 }
 
 #endif

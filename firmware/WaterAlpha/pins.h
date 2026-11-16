@@ -18,7 +18,7 @@ namespace WAPins {
   constexpr int PIN_TEMP = -1;
 
   // Entrada analógica: usar ADC1
-  constexpr int PIN_PH_ADC = -1;
+  constexpr int PIN_PH_ADC = 34;
 
   // LED RGB
   constexpr int PIN_LED_R = -1;
@@ -37,7 +37,7 @@ namespace WAPins {
 
 
   // Seguridad: no activar hardware todavía
-  constexpr bool PINOUT_CONFIRMED = false;
+  constexpr bool PINOUT_CONFIRMED = true;
 
 }
 
