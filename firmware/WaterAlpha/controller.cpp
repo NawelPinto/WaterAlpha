@@ -211,7 +211,9 @@ namespace {
       r.calibrated = ph.calibrated;
 
       if (r.ph_sensor_ok && r.temperature_sensor_ok) {
-        r.stable = updateVoltageStability(volts) && updateTemperatureStability(r.temperature);
+        const bool phStable = updateVoltageStability(volts);
+        const bool temperatureStable = updateTemperatureStability(r.temperature);
+        r.stable = phStable && temperatureStable;
       } else {
         clearVoltageWindow();
       }

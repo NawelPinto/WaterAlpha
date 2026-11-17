@@ -7,7 +7,7 @@
 | Item | Estado | Observación |
 |---|---|---|
 | C++ controlador/estados/calibración | VERIFICADO EN VOLCADO TXT | Existe estructura, pero no se dispone aquí de un checkout real GitHub ni logs actuales de compilación Arduino |
-| Dashboard web | PROPUESTA IMPLEMENTADA | El volcado TXT no incluye el código original `web/*.js/html/css`; este paquete entrega un frontend nuevo compatible con API schema_version=1 |
+| Dashboard web | PROPUESTA IMPLEMENTADA | Los siete archivos originales `web/` fueron inspeccionados directamente mediante la conexión GitHub y modificados conservando el esquema de interfaz; hay una propuesta alternativa de frontend en ZIP |
 | `mode` de API | BUG IDENTIFICADO Y CORREGIDO EN PARCHE | Original decía `MOCK` siempre, incluso con adquisición REAL |
 | Pines `25`, `34` y `PINOUT_CONFIRMED=true` | RIESGO IDENTIFICADO | No existe pinout UAI que avale esos valores. Parche los reinicia a -1 y false |
 | Medición de pH en hardware | BLOQUEADO | Requiere medición AO, adaptación eléctrica, patrón y verificación independiente |
@@ -51,7 +51,7 @@
 
 ## Hallazgos técnicos que no deben omitirse
 
-1. **Estado de datos inconsistente:** `config.h` de volc. indicaba `MOCK_MODE=false`, `USE_REAL_PH=true`, `USE_REAL_TEMPERATURE=false` y `pins.h` confirmado. En tal situación el `controller` podía buscar pH real sin temperatura; la FSM debía indicar error; API además reportaba erróneamente `mode:MOCK`. El paquete devuelve valores seguros por defecto.
+1. **Estado de datos inconsistente:** `config.h` de volc. indicaba `MOCK_MODE=false`, `USE_REAL_PH=true`, `USE_REAL_TEMPERATURE=false` y `pins.h` confirmado. En tal situación el `controller` podía buscar pH real sin temperatura; la FSM debía indicar error; API además reportaba erróneamente `mode:MOCK`. La rama cambia a valores seguros por defecto.
 2. **No había criterio temporal de temperatura en REAL:** el `stable` original solo verificaba amplitud de mV de pH. El parche introduce una ventana térmica de 5 lecturas, margen 0,5 °C preliminar.
 3. **No hay norma simple de potabilidad basada en pH/T:** evitar “agua segura”, “apta para beber”, “potable”. Incluso `GREEN` significa solo éxito limitado del dispositivo bajo referencias fijadas.
 4. **Semáforo físico:** RGB de cuatro patillas y tres LED independientes no son intercambiables. El parche adapta la salida a tres LED por GPIO; los estados lógicos siguen siendo cinco, diferenciados por parpadeo.
@@ -74,4 +74,4 @@
 | Solo 3 LEDs para 5 estados | Media | Patrón de parpadeo BLUE/MAGENTA + leyenda; verificar video físico |
 | Exposición exagera alcance | Alta | Aviso permanente en web, README, PPT y defensa oral |
 
-**Puerta de cierre:** el usuario deberá copiar este overlay a la clonación real y volver a compilar el firmware. Este paquete NO fue subido a GitHub ni ejecutado sobre la placa UAI; los archivos y pruebas creados localmente no constituyen evidencia física.
+**Puerta de cierre:** el usuario deberá copiar este overlay a la clonación real y volver a compilar el firmware. Esta propuesta ya se incorporó a una rama de revisión de GitHub; no se ha combinado con main ni ejecutado sobre la placa UAI. Las pruebas de lógica aislada no constituyen evidencia física.

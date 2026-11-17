@@ -59,7 +59,7 @@ python -m http.server 8000 --bind 127.0.0.1
 
 Abrir `http://127.0.0.1:8000/`. `web/config.js` utiliza `API_MODE:"MOCK"` y muestra controles de simulación. **Es una demostración sintética del sitio, no una medición real.** Si no abre el enlace, usar expresamente la dirección `127.0.0.1`.
 
-Para probar el servidor HTTP sintético del repositorio, ejecutar `python tests/mock_http_server.py` si ese archivo está disponible y seleccionar `API_MODE:"REAL"` en una copia del sitio; el JSON recibido seguirá señalando `mode:"MOCK"` si la fuente es simulada.
+Para probar el servidor HTTP sintético del repositorio, ejecutar `python tests/mock_http_server.py` y seleccionar `API_MODE:"REAL"` en una copia del sitio; el JSON recibido seguirá señalando `mode:"MOCK"` si la fuente es simulada.
 
 ## 5. Cómo conectar la web al ESP32
 
@@ -130,4 +130,4 @@ tests/                    # pruebas unitarias y pruebas existentes
 ## 10. Referencias y fuentes
 
 Véase **`FUENTES.md` del equipo**; no copiar especificaciones no verificadas de modelos diferentes. Como fuentes técnicas primarias para revisar el diseño están el fabricante Analog Devices (DS18B20), Espressif (ESP32/ADC y GPIO) y la publicación del producto AFEL/Kuongshun. Toda afirmación de exactitud deberá corresponder al módulo exacto y a su prueba experimental.
-**Nota de actualización GitHub (16/11/2026):** En esta rama se ha revisado el código web original de `main` y se aplican modificaciones incrementales al dashboard. Las comprobaciones de integración física, calibración pH y CAD real continúan pendientes; no se acreditan con archivos Markdown.
+**Nota de actualización GitHub (16/11/2026):** En esta rama se revisó el código web original de `main` y se aplicaron modificaciones incrementales al dashboard. Las comprobaciones de integración física, calibración pH y CAD real continúan pendientes; no se acreditan con archivos Markdown.

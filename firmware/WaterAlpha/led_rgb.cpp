@@ -15,7 +15,8 @@ namespace {
  }
  bool wiringOK() {
    const int r=WAPins::PIN_LED_R,g=WAPins::PIN_LED_G,y=WAPins::PIN_LED_B;
-   if (!WAPins::PINOUT_CONFIRMED || !WAPins::LED_TYPE_CONFIRMED) return false;
+   // Este controlador usa tres LEDs discretos activos en HIGH, no RGB de anodo comun.
+   if (!WAPins::PINOUT_CONFIRMED || !WAPins::LED_TYPE_CONFIRMED || WAPins::LED_COMMON_ANODE) return false;
    if (!candidate(r)||!candidate(g)||!candidate(y)) return false;
    if (r==g||r==y||g==y) return false;
    if (r==WAPins::PIN_TEMP||g==WAPins::PIN_TEMP||y==WAPins::PIN_TEMP) return false;

@@ -1,0 +1,34 @@
+name: WaterAlpha - pruebas de logica
+on:
+  pull_request:
+  push:
+    branches:
+      - avance3-integracion-2026-11-16
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests del simulador y maquina de estados
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wateralphatest
+          g++ -std=c++17 -Wall -Wextra -I firmware/WaterAlpha tests/test_state_machine.cpp firmware/WaterAlpha/state_machine.cpp -o /tmp/wateralphatest/state_machine
+          /tmp/wateralphatest/state_machine
+          g++ -std=c++17 -Wall -Wextra -I firmware/WaterAlpha tests/test_led_status_logic.cpp -o /tmp/wateralphatest/led_status
+          /tmp/wateralphatest/led_status
+          g++ -std=c++17 -Wall -Wextra -I firmware/WaterAlpha tests/test_system_flow.cpp firmware/WaterAlpha/mock_sensors.cpp firmware/WaterAlpha/state_machine.cpp firmware/WaterAlpha/ph_calibration.cpp firmware/WaterAlpha/ph_pipeline.cpp -o /tmp/wateralphatest/system_flow
+          /tmp/wateralphatest/system_flow
+      - name: Sintaxis JavaScript
+        shell: bash
+        run: |
+          node --check web/app.js
+          node --check web/api.js
+          node --check web/config.js
+          node --check web/mock.js
+          node --check web/state_machine.js
+      - name: Sintaxis Python
+        shell: bash
+        run: |
+          python -m py_compile scripts/sync_web.py scripts/record_readings.py tests/mock_http_server.py
