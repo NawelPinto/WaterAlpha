@@ -8,7 +8,7 @@
 
 El usuario objetivo es una persona senderista que necesita información instrumental preliminar acerca de una muestra de agua, más allá de la apariencia visual. Esta etapa Alpha implementa dos parámetros: **pH** (adimensional) y **temperatura** (°C). Conductividad (µS/cm) y turbidez (NTU) son futuras ampliaciones, no implementadas en este prototipo. WaterAlpha informa y supervisa; **no trata, purifica ni controla el agua**.
 
-**Integrantes del equipo:** [Sofía Kunihiro, Florencia Venegas, Simón, Aníbal Pinto].
+**Integrantes del equipo:** [Sofía Kunihiro, Florencia Venegas, Simón Restrepo, Aníbal Pinto].
 
 ## 2. Arquitectura de funcionamiento
 
