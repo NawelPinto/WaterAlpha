@@ -1,4 +1,3 @@
-
 #ifndef WATERALPHA_PINS_H
 #define WATERALPHA_PINS_H
 
@@ -15,7 +14,7 @@
 namespace WAPins {
 
   // Sensor digital DS18B20
-  constexpr int PIN_TEMP = -1;
+  constexpr int PIN_TEMP = 25;
 
   // Entrada analógica: usar ADC1
   constexpr int PIN_PH_ADC = 34;

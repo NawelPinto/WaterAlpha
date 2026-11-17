@@ -71,7 +71,7 @@ namespace WAConfig {
   constexpr float PH_HYSTERESIS = 0.1f;
 
   // El firmware aún utilizará valores simulados
-  constexpr bool MOCK_MODE = false;
+  constexpr bool MOCK_MODE = false  ;
 }
 
 #endif
