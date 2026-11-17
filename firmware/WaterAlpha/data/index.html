@@ -1,172 +1,315 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#081322">
+  <title>WaterAlpha | Monitoreo de pH y temperatura</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Solo añade estilos a las tarjetas nuevas; mantiene style.css original. */
+    .wa-experimental {
+      max-width: 680px;
+      margin: 18px auto;
+      padding: 22px;
+      border-radius: 16px;
+      background: #111e31;
+      border: 1px solid #29405a;
+      color: #f5f8fe;
+      box-sizing: border-box;
+    }
+    .wa-experimental h2 {
+      font-size: 16px;
+      margin: 0 0 14px;
+      color: #9cccf5;
+    }
+    .wa-experimental .wa-reading {
+      font-size: clamp(30px, 7vw, 42px);
+      font-weight: 750;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+    .wa-experimental .wa-mv {
+      color: #a5bdd2;
+      margin: 7px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .wa-experimental p { line-height: 1.45; }
+    .wa-experimental .wa-note {
+      color: #a7b9ca;
+      font-size: 13px;
+      margin-bottom: 0;
+    }
+    .wa-experimental .wa-preview-status { color: #f0cf8f; }
+    .wa-local-layout {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 10px 12px 35px;
+    }
+    .wa-local-layout header { text-align: center; margin: 18px auto 24px; }
+    .wa-local-layout header h1 {
+      letter-spacing: .17em;
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+    .wa-local-layout header p { color: #99b9d3; }
+    .wa-local-layout .wa-card {
+      background: #111e31;
+      border: 1px solid #243b55;
+      border-radius: 16px;
+      padding: 21px;
+      margin: 14px 0;
+    }
+    .wa-local-layout .wa-state { text-align: center; }
+    #status-light {
+      display: block;
+      width: 106px;
+      height: 106px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: #66778c;
+      box-shadow: 0 0 28px rgba(130, 150, 170, .12);
+    }
+    .wa-local-layout .wa-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .wa-local-layout .wa-grid .wa-card { margin: 0; }
+    .wa-local-layout .wa-value { font-size: 29px; font-weight: 700; }
+    .wa-local-layout .wa-muted { color: #a5bdd2; }
 
-  <title>WaterAlpha | Evaluación de agua</title>
-
-  <!-- Conexión con nuestro archivo CSS -->
-  <link rel="stylesheet" href="style.css">
-  <script src="config.js" defer></script>
-  <script src="mock.js" defer></script>
-  <script src="state_machine.js" defer></script>
-  <script src="api.js" defer></script>
-  <script src="app.js" defer></script>
- 
+    .wa-screening-title { font-size: 20px; font-weight: 700; margin: 8px 0; }
+    .wa-screening-text { color: #bcd4e7; line-height: 1.45; }
+    .wa-screening-warning { color: #eecf99; font-size: 13px; }
+    .wa-local-layout .simulator { display: none; }
+    .wa-local-layout pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      color: #b8d2e7;
+      font-size: 12px;
+    }
+    .wa-local-layout footer { color: #a7b9ca; font-size: 13px; text-align: center; }
+    @media (max-width: 430px) {
+      .wa-local-layout .wa-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-
 <body>
-
-  <main class="dashboard">
-
-    <!-- ENCABEZADO -->
-    <header class="header">
-      <span class="brand">WATER<span>ALPHA</span></span>
-      <p>Evaluación preliminar de agua</p>
-      <span id="mode-badge" class="mode">MODO SIMULACIÓN</span>
+  <main class="wa-local-layout">
+    <header>
+      <h1>WATER<span style="color:#39b9ff">ALPHA</span></h1>
+      <p>Monitoreo instrumental de pH y temperatura · no evalúa potabilidad</p>
+      <div id="mode-badge" class="mode">MODO REAL</div>
     </header>
 
-    <!-- ESTADO PRINCIPAL -->
-    <section class="status-card">
-      <div id="status-light" class="status-light blue"></div>
+    <!-- IDs originales: app.js sigue actualizando el estado virtual. -->
+    <section class="wa-card wa-state" aria-live="polite">
+      <span id="status-light" aria-hidden="true"></span>
+      <h2 id="status-title">Inicializando...</h2>
+      <p id="status-message" class="wa-muted">Esperando una lectura actualizada.</p>
+    </section>
 
-      <h1 id="status-title">Inicializando</h1>
+    <div class="wa-grid">
+      <section class="wa-card">
+        <p class="wa-muted">pH validado por el firmware</p>
+        <div id="ph-value" class="wa-value">--</div>
+      </section>
+      <section class="wa-card">
+        <p class="wa-muted">Temperatura</p>
+        <div id="temperature-value" class="wa-value">--</div>
+      </section>
+    </div>
 
-      <p id="status-message">
-        Esperando mediciones...
+    <!-- NUEVO: vista experimental separada del pH oficial y del semaforo. -->
+    <section class="wa-experimental" aria-labelledby="wa-exp-heading">
+      <h2 id="wa-exp-heading">SENSOR DE pH · MODELO CALIBRADO EXPERIMENTALMENTE</h2>
+      <div id="ph-preview" class="wa-reading">-- pH</div>
+      <p id="ph-preview-state" class="wa-preview-status">Esperando datos del ESP32...</p>
+      <div id="ph-preview-mv" class="wa-mv">ADC: -- mV</div>
+      <p class="wa-note">
+        Modelo de dos puntos: pH 4,19 (2194 mV) y 9,38 (2031,29 mV).
+        Comprobación independiente con pH 7,09: error absoluto observado 0,316 pH.
+        Esto NO establece exactitud general ni compensación térmica.
+        No determina potabilidad.
       </p>
     </section>
 
-    <!-- MEDICIONES -->
-    <section class="measurements">
 
-      <article class="measurement-card">
-        <h2>pH</h2>
-        <p id="ph-value" class="value">--</p>
-        <span>Escala de pH</span>
-      </article>
-
-      <article class="measurement-card">
-        <h2>Temperatura</h2>
-        <p id="temperature-value" class="value">--</p>
-        <span>Grados Celsius (°C)</span>
-      </article>
-
+    <section class="wa-card" aria-live="polite">
+      <h2>Indicadores fisicos (en montaje)</h2>
+      <p id="led-indicator-status">Esperando estado...</p>
+      <p class="wa-note">Se encienden desde el estado principal del ESP32, no desde el tamizaje experimental.
+        Verde = referencia validada; amarillo = precaucion; rojo = fuera de referencia;
+        amarillo intermitente = inicio; rojo intermitente = fallo/lectura sin validar.
+        Las luces permaneceran apagadas hasta instalar sus resistencias y verificar los GPIO.</p>
     </section>
 
-    <!-- DIAGNÓSTICO -->
-    <section class="diagnostics">
-      <h2>Estado del sistema</h2>
-
-      <p id="ph-sensor-status">○ Sensor de pH: pendiente</p>
-      <p id="temperature-sensor-status">○ Sensor de temperatura: pendiente</p>
-      <p id="stability-status">○ Estabilidad: pendiente</p>
-      <p id="calibration-status">○ Calibración: pendiente</p>
+    <!-- Evaluacion experimental adicional: nunca reemplaza el estado formal MAGENTA. -->
+    <section class="wa-card" aria-labelledby="screening-heading" aria-live="polite">
+      <h2 id="screening-heading">Evaluacion preliminar de pH y temperatura</h2>
+      <p id="screening-title" class="wa-screening-title">Esperando datos del ESP32...</p>
+      <p id="screening-message" class="wa-screening-text">La evaluacion no determina potabilidad.</p>
+      <p id="temperature-context" class="wa-screening-text">Contexto termico: --</p>
+      <p class="wa-screening-warning"><strong>Potabilidad: <span id="potability-status">INDETERMINADA</span></strong></p>
+      <p class="wa-screening-text">Referencia de pH: 6,5 &lt; pH &lt; 8,5 (NCh409/1:2005).
+        Ventana termica experimental: 18,9–22,9 °C, alrededor del ensayo de 20,9 °C.
+        No equivale a una norma de temperatura para consumo humano.</p>
+      <p class="wa-screening-text">Sin medicion de conductividad ni turbidez; tampoco se evaluan
+        microorganismos, desinfeccion ni contaminantes quimicos.</p>
     </section>
 
-    
-<!-- PANEL DE SIMULACIÓN -->
-<section class="simulator">
+    <section class="wa-card">
+      <h2>Diagnóstico de los sensores</h2>
+      <p>Sensor pH: <strong id="ph-sensor-status">--</strong></p>
+      <p>Sensor de temperatura: <strong id="temperature-sensor-status">--</strong></p>
+      <p>Estabilidad: <strong id="stability-status">--</strong></p>
+      <p>Calibración validada: <strong id="calibration-status">--</strong></p>
+    </section>
 
-  <h2>Simulador de sensores</h2>
+    <section class="wa-card">
+      <h2>Datos del ESP32</h2>
+      <pre id="json-preview">Esperando respuesta...</pre>
+    </section>
 
-  <p class="simulator-description">
-    Modifica las lecturas y condiciones del sistema.
-    Datos ficticios para desarrollo.
-  </p>
-
-  <!-- Control de pH -->
-  <div class="control">
-    <label for="ph-input">
-      pH simulado:
-      <output id="ph-slider-value">7.20</output>
-    </label>
-
-    <input
-      type="range"
-      id="ph-input"
-      min="0"
-      max="14"
-      step="0.05"
-      value="7.2"
-    >
-  </div>
-
-  <!-- Control de temperatura -->
-  <div class="control">
-    <label for="temperature-input">
-      Temperatura simulada:
-      <output id="temperature-slider-value">17.8 °C</output>
-    </label>
-
-    <input
-      type="range"
-      id="temperature-input"
-      min="-10"
-      max="50"
-      step="0.1"
-      value="17.8"
-    >
-  </div>
-
-  <!-- Condiciones del sistema -->
-  <div class="mock-flags">
-
-    <label>
-      <input type="checkbox" id="ph-connected" checked>
-      Sensor pH conectado
-    </label>
-
-    <label>
-      <input type="checkbox" id="temperature-connected" checked>
-      Sensor temperatura conectado
-    </label>
-
-    <label>
-      <input type="checkbox" id="stable-input" checked>
-      Lectura estable
-    </label>
-
-    <label>
-      <input type="checkbox" id="calibrated-input" checked>
-      Calibración válida
-    </label>
-    
-    <label>
-      <input type="checkbox" id="initializing-input">
-      Sistema inicializando
-    </label>
-
-
-  </div>
-
-</section>
-
-
-<!-- INSPECTOR DE API -->
-<details class="api-debug">
-
-  <summary>
-    Datos recibidos de la API (JSON)
-  </summary>
-
-  <pre id="json-preview">Esperando respuesta...</pre>
-
-</details>
-
-
-    <!-- ADVERTENCIA -->
-    <footer class="warning">
-      <strong>Importante</strong>
-      <p>
-        Evaluación preliminar. No certifica potabilidad
-        ni ausencia de patógenos.
-      </p>
+    <footer>
+      Evaluación preliminar. No certifica potabilidad ni ausencia de patógenos.
     </footer>
-
   </main>
 
+  <!-- Vista REAL independiente. No depende de app.js ni modifica firmware. -->
+  <script>
+    (() => {
+      "use strict";
+      const el = (id) => document.getElementById(id);
+      const REFRESH_MS = 1500;
+      let pending = false;
+
+      const COLORS = {
+        BLUE: "#3498ed",
+        GREEN: "#34bb8c",
+        YELLOW: "#e9b849",
+        RED: "#e16472",
+        MAGENTA: "#b566df"
+      };
+      const HEADINGS = {
+        BLUE: "Inicializando",
+        GREEN: "Dentro de referencias preliminares",
+        YELLOW: "Atención",
+        RED: "Fuera de referencias preliminares",
+        MAGENTA: "Medición no validada"
+      };
+      const number = (n) => typeof n === "number" && Number.isFinite(n);
+      const SCREEN_LABELS = {
+        NO_EVALUABLE: "Evaluacion no disponible",
+        ALERTA_PH: "Alerta preliminar de pH",
+        PRECAUCION: "Precaucion: revisar condiciones",
+        PH_DENTRO_REFERENCIA: "pH experimental dentro de referencia"
+      };
+
+      function colorLight(state) {
+        const color = COLORS[state] || "#66778c";
+        el("status-light").style.background = color;
+        el("status-light").style.boxShadow = `0 0 28px ${color}55`;
+      }
+
+      function showReadings(data) {
+        const real = data.mode === "REAL";
+        const tempOK = data.temperature_sensor_ok === true && number(data.temperature);
+        const adcOK = real && number(data.ph_adc_mv);
+        const experimentalOK = real && number(data.ph_estimated);
+        // Mostrar una lectura calibrada aunque esté transitoriamente inestable;
+        // su diagnostico de validez permanece visible por separado.
+        const officialPhOK = data.calibrated === true &&
+                             data.ph_sensor_ok === true && number(data.ph);
+        const state = typeof data.state === "string" ? data.state : "MAGENTA";
+
+        el("mode-badge").textContent = real ? "MODO REAL" : `MODO ${data.mode || "DESCONOCIDO"}`;
+        el("status-title").textContent = HEADINGS[state] || state;
+        el("status-message").textContent = data.message || "Sin mensaje del ESP32";
+        colorLight(state);
+        const physicalText = {
+          GREEN: "VERDE fijo - pH dentro del criterio experimental, mediciones formalmente validadas",
+          YELLOW: "AMARILLO fijo - precaucion / estabilidad pendiente",
+          RED: "ROJO fijo - pH fuera de referencia experimental",
+          BLUE: "AMARILLO intermitente lento - inicializando",
+          MAGENTA: "ROJO intermitente rapido - medicion no validada"
+        };
+        el("led-indicator-status").textContent = physicalText[state] || "Estado no disponible";
+
+        el("temperature-value").textContent = tempOK ? `${data.temperature.toFixed(2)} °C` : "--";
+        el("ph-value").textContent = officialPhOK ? data.ph.toFixed(2) : "--";
+        el("ph-preview-mv").textContent = adcOK
+          ? `ADC: ${Math.round(data.ph_adc_mv)} mV` : "ADC: -- mV";
+        el("ph-preview").textContent = experimentalOK
+          ? `${data.ph_estimated.toFixed(2)} pH` : "-- pH";
+        el("ph-preview-state").textContent = experimentalOK
+          ? "Estimación por calibración experimental de 2 puntos · verificación en firmware: " +
+            (data.calibrated === true ? "confirmada por firmware" : "pendiente de evidencia en firmware")
+          : adcOK
+            ? "ADC recibido; sin estimación válida (fuera de rango o modelo no disponible)"
+            : "Señal de pH no disponible";
+
+        el("ph-sensor-status").textContent = data.ph_sensor_ok === true
+          ? "Validación electrónica habilitada"
+          : adcOK ? "ADC activo; validación de pH pendiente" : "No disponible / sin validar";
+        el("temperature-sensor-status").textContent = tempOK ? "Conectado" : "No disponible";
+        el("stability-status").textContent = data.stable === true ? "Sí" : "No verificada";
+        el("calibration-status").textContent = data.calibrated === true ? "Sí" : "Pendiente";
+        const screen = data.screening_status || "NO_EVALUABLE";
+        el("screening-title").textContent = SCREEN_LABELS[screen] || "Evaluacion no disponible";
+        el("screening-message").textContent = data.screening_message || "Evaluacion no disponible.";
+        const tContext = data.temperature_reference_status;
+        el("temperature-context").textContent = tContext === "CERCANA_CALIBRACION"
+          ? "Temperatura cercana a la del ensayo de calibracion (20,9 °C)."
+          : tContext === "FUERA_VENTANA_EXPERIMENTAL"
+            ? "Temperatura fuera de la ventana experimental; compensacion termica no validada."
+            : "Temperatura no disponible o sin referencia experimental.";
+        el("potability-status").textContent = "INDETERMINADA";
+        el("json-preview").textContent = JSON.stringify(data, null, 2);
+      }
+
+      function showOffline(reason) {
+        el("mode-badge").textContent = "SIN CONEXIÓN";
+        el("status-title").textContent = "Sin conexión";
+        el("status-message").textContent = "No se pudo obtener una lectura actualizada.";
+        colorLight("OFFLINE");
+        el("temperature-value").textContent = "--";
+        el("ph-value").textContent = "--";
+        el("ph-preview").textContent = "-- pH";
+        el("ph-preview-mv").textContent = "ADC: -- mV";
+        el("ph-preview-state").textContent = "Sin comunicación con el ESP32";
+        el("led-indicator-status").textContent = "Sin comunicacion: luces deben interpretarse desde el ESP32";
+        el("ph-sensor-status").textContent = "--";
+        el("temperature-sensor-status").textContent = "--";
+        el("stability-status").textContent = "--";
+        el("calibration-status").textContent = "--";
+        el("screening-title").textContent = "Sin comunicacion";
+        el("screening-message").textContent = "No es posible realizar una evaluacion preliminar.";
+        el("temperature-context").textContent = "Contexto termico: sin datos";
+        el("potability-status").textContent = "INDETERMINADA";
+        el("json-preview").textContent = "Error al solicitar /api/readings: " + reason;
+      }
+
+      async function refresh() {
+        if (pending) return;
+        pending = true;
+        try {
+          const response = await fetch("/api/readings", { cache: "no-store" });
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          const data = await response.json();
+          if (!data || typeof data !== "object") throw new Error("JSON inválido");
+          showReadings(data);
+        } catch (error) {
+          showOffline(error?.message || "Error de conexión");
+        } finally {
+          pending = false;
+        }
+      }
+
+      refresh();
+      setInterval(refresh, REFRESH_MS);
+    })();
+  </script>
 </body>
 </html>

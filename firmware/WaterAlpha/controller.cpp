@@ -28,6 +28,8 @@ namespace {
 
   WAPhCalibration::Calibration phModel{0.0, 0.0, false};
   bool phCalibrationVerified = false;
+  double lastPhAdcMv = std::numeric_limits<double>::quiet_NaN();
+  double lastEstimatedPh = std::numeric_limits<double>::quiet_NaN();
 
   // Ventana corta para calcular estabilidad del voltaje de pH REAL.
   // No usar datos MOCK aqui.
@@ -35,6 +37,9 @@ namespace {
   double voltageWindow[WINDOW_CAPACITY]{};
   uint8_t windowCount = 0;
   uint8_t windowNext = 0;
+  float temperatureWindow[WINDOW_CAPACITY]{};
+  uint8_t temperatureCount = 0;
+  uint8_t temperatureNext = 0;
 
   float invalidFloat() {
     return std::numeric_limits<float>::quiet_NaN();
@@ -43,6 +48,26 @@ namespace {
   void clearVoltageWindow() {
     windowCount = 0;
     windowNext = 0;
+    temperatureCount = 0;
+    temperatureNext = 0;
+  }
+
+  bool updateTemperatureStability(float celsius) {
+    if (!std::isfinite(celsius) || WAConfig::TEMP_STABILITY_MAX_SPAN_C <= 0.0f) {
+      temperatureCount = 0;
+      temperatureNext = 0;
+      return false;
+    }
+    temperatureWindow[temperatureNext] = celsius;
+    temperatureNext = (temperatureNext + 1) % WINDOW_CAPACITY;
+    if (temperatureCount < WINDOW_CAPACITY) ++temperatureCount;
+    if (temperatureCount < WINDOW_CAPACITY) return false;
+    float lo = temperatureWindow[0], hi = temperatureWindow[0];
+    for (uint8_t i = 1; i < WINDOW_CAPACITY; ++i) {
+      if (temperatureWindow[i] < lo) lo = temperatureWindow[i];
+      if (temperatureWindow[i] > hi) hi = temperatureWindow[i];
+    }
+    return hi - lo <= WAConfig::TEMP_STABILITY_MAX_SPAN_C;
   }
 
   bool updateVoltageStability(double adcMillivolts) {
@@ -147,6 +172,8 @@ namespace {
     r.calibrated = false;
     r.stable = false;
     r.initializing = (uint32_t(now - bootTime) < WAField::REAL_STARTUP_MS);
+    lastPhAdcMv = std::numeric_limits<double>::quiet_NaN();
+    lastEstimatedPh = std::numeric_limits<double>::quiet_NaN();
 
     // Temperatura: solo lecturas obtenidas realmente por 1-Wire.
     if (WAConfig::USE_REAL_TEMPERATURE) {
@@ -167,6 +194,12 @@ namespace {
       }
 
       const double volts = static_cast<double>(raw.adcMillivolts);
+      if (raw.acquired) {
+        lastPhAdcMv = volts;
+        // Es una estimacion matemática de laboratorio, NO una lectura validada.
+        WAPhCalibration::Result estimate = WAPhCalibration::estimatePh(phModel, volts);
+        if (estimate.valid) lastEstimatedPh = estimate.ph;
+      }
       const bool voltagePlausible = raw.acquired && adcInVerifiedRange(volts);
       const bool signalEvidence = (
         voltagePlausible &&
@@ -186,7 +219,9 @@ namespace {
       r.calibrated = ph.calibrated;
 
       if (r.ph_sensor_ok && r.temperature_sensor_ok) {
-        r.stable = updateVoltageStability(volts);
+        const bool phStable = updateVoltageStability(volts);
+        const bool tempStable = updateTemperatureStability(r.temperature);
+        r.stable = phStable && tempStable;
       } else {
         clearVoltageWindow();
       }
@@ -212,6 +247,8 @@ namespace WAController {
     lastSampleTime = bootTime;
     machine.reset();
     clearVoltageWindow();
+    lastPhAdcMv = std::numeric_limits<double>::quiet_NaN();
+    lastEstimatedPh = std::numeric_limits<double>::quiet_NaN();
 
     if (WAConfig::MOCK_MODE) {
       Serial.println("[CTRL] Modo MOCK: ningun sensor fisico habilitado");
@@ -248,6 +285,10 @@ namespace WAController {
     }
     currentDecision = next;
   }
+
+  double phAdcMillivolts() { return lastPhAdcMv; }
+
+  double phEstimatedPreview() { return lastEstimatedPh; }
 
   Snapshot snapshot() {
     return {

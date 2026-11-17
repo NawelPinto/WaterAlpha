@@ -1,4 +1,3 @@
-
 #ifndef WATERALPHA_CONFIG_H
 #define WATERALPHA_CONFIG_H
 
@@ -12,7 +11,7 @@ namespace WAConfig {
   // LED RGB fisico
   // false: solo simulacion por Serial
   // true: habilitar salidas PWM
-  constexpr bool USE_REAL_LED = false;
+  constexpr bool USE_REAL_LED = false; // Activar solo tras resistencias + pinout + pruebas electricas
 
   // Frecuencia PWM
   constexpr uint32_t LED_PWM_FREQUENCY = 1000;
@@ -33,7 +32,7 @@ namespace WAConfig {
   // Fuente de temperatura
   // false: simulada
   // true: DS18B20 fisico
-  constexpr bool USE_REAL_TEMPERATURE = false;
+  constexpr bool USE_REAL_TEMPERATURE = true; // Mantener si DS18B20 funciona en GPIO configurado
 
   // Tiempo maximo de conversion a 12 bits
   constexpr uint32_t TEMP_CONVERSION_MS = 750;
@@ -49,6 +48,10 @@ namespace WAConfig {
   // Rango nominal del DS18B20
   constexpr float TEMP_SENSOR_MIN = -55.0f;
   constexpr float TEMP_SENSOR_MAX = 125.0f;
+
+  // Estabilidad termica experimental: amplitud maxima en 5 lecturas.
+  // Ajustar solo con ensayos; no es limite sanitario.
+  constexpr float TEMP_STABILITY_MAX_SPAN_C = 0.5f;
 
   // Nombre de la red creada por el ESP32
   constexpr char WIFI_SSID[] = "WaterAlpha";
@@ -67,11 +70,11 @@ namespace WAConfig {
   constexpr float PH_MAX = 8.5f;
 
   // Parámetros de diseño, no normativos
-  constexpr float PH_CAUTION_MARGIN = 0.1f;
+  constexpr float PH_CAUTION_MARGIN = 0.32f; // Criterio experimental, NO incertidumbre certificada
   constexpr float PH_HYSTERESIS = 0.1f;
 
   // El firmware aún utilizará valores simulados
-  constexpr bool MOCK_MODE = false  ;
+  constexpr bool MOCK_MODE = false; // Lecturas fisicas; no mezcla datos sinteticos
 }
 
 #endif

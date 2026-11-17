@@ -1,4 +1,3 @@
-
 #ifndef WATERALPHA_CONTROLLER_H
 #define WATERALPHA_CONTROLLER_H
 
@@ -23,6 +22,11 @@ namespace WAController {
 
   // Obtener última medición procesada
   Snapshot snapshot();
+
+  // Diagnostico experimental: ADC medido y estimacion por calibracion
+  // matematica, aun si no paso las puertas de validacion formal.
+  double phAdcMillivolts();
+  double phEstimatedPreview();
 
 }
 

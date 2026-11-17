@@ -1,4 +1,3 @@
-
 #include "state_machine.h"
 #include "config.h"
 
@@ -31,7 +30,20 @@ namespace WA {
     const Readings& r
   ) {
 
-    // 1. Comprobar fallos conocidos
+    // 1. Inicializacion
+    if (r.initializing) {
+
+      reset();
+
+      return {
+        State::BLUE,
+        "Esperando mediciones validas.",
+        false
+      };
+    }
+
+
+    // 2. Comprobar fallos conocidos
     if (
       !r.ph_sensor_ok ||
       !r.temperature_sensor_ok ||
@@ -43,18 +55,6 @@ namespace WA {
       return {
         State::MAGENTA,
         "Sensor o calibracion invalida.",
-        false
-      };
-    }
-
-    // 2. Inicializacion
-    if (r.initializing) {
-
-      reset();
-
-      return {
-        State::BLUE,
-        "Esperando mediciones validas.",
         false
       };
     }
@@ -86,7 +86,7 @@ namespace WA {
 
       return {
         State::YELLOW,
-        "Lectura inestable.",
+        "Variabilidad temporal de pH o temperatura sobre el criterio experimental.",
         false
       };
     }
@@ -126,7 +126,7 @@ namespace WA {
 
       return {
         State::RED,
-        "pH fuera de referencia.",
+        "pH fuera de referencia experimental (sin juicio de potabilidad).",
         true
       };
     }
@@ -148,7 +148,7 @@ namespace WA {
 
       return {
         State::YELLOW,
-        "pH cercano a un limite.",
+        "pH proximo a limite experimental.",
         true
       };
     }
@@ -156,7 +156,7 @@ namespace WA {
     // 10. Sin anomalía detectada
     return {
       State::GREEN,
-      "pH dentro de referencia.",
+      "pH dentro de referencia experimental; no certifica potabilidad.",
       true
     };
   }
