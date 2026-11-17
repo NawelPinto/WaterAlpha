@@ -14,15 +14,15 @@
 namespace WAPins {
 
   // Sensor digital DS18B20
-  constexpr int PIN_TEMP = 25;
+  constexpr int PIN_TEMP = -1; // Pendiente verificar exposicion de GPIO25 en placa UAI
 
   // Entrada analógica: usar ADC1
-  constexpr int PIN_PH_ADC = 34;
+  constexpr int PIN_PH_ADC = -1; // Pendiente verificar exposicion de GPIO34 en placa UAI
 
   // LED RGB
   constexpr int PIN_LED_R = -1;
   constexpr int PIN_LED_G = -1;
-  constexpr int PIN_LED_B = -1;
+  constexpr int PIN_LED_B = -1; // Nombre historico: canal AMARILLO en 3 LEDs discretos
 
   
   // Tipo de LED por confirmar.
@@ -36,7 +36,7 @@ namespace WAPins {
 
 
   // Seguridad: no activar hardware todavía
-  constexpr bool PINOUT_CONFIRMED = true;
+  constexpr bool PINOUT_CONFIRMED = false; // Bloqueo preventivo
 
 }
 

@@ -30,9 +30,9 @@ function render(data) {
 
   element("status-title").textContent =
     data.state === "GREEN"
-      ? "Sin anomalía detectada"
+      ? "pH en referencia y lecturas estables"
       : data.state === "RED"
-        ? "Anomalía detectada"
+        ? "pH fuera de referencia"
         : data.state === "YELLOW"
           ? "Precaución"
           : data.state === "BLUE"
@@ -40,7 +40,21 @@ function render(data) {
             : "Error del sistema";
 
   element("status-message").textContent =
-    data.message;
+    data.message + (data.mode === "MOCK" ? " [DATOS SIMULADOS]" : "");
+
+  // Un estado GREEN inconsistente con flags no se presenta como válido.
+  if (data.state === "GREEN" &&
+      (!data.reading_valid || !data.stable || !data.calibrated ||
+       !data.ph_sensor_ok || !data.temperature_sensor_ok)) {
+    element("status-light").className = "status-light magenta";
+    element("status-title").textContent = "Diagnóstico sin validar";
+    element("status-message").textContent =
+      "La API informa GREEN, pero no aporta todos los indicadores requeridos.";
+  }
+  element("reading-valid-status").textContent =
+    data.mode === "MOCK" ? "○ Fuente simulada: no constituye evidencia experimental" :
+    data.reading_valid ? "✓ Lectura considerada válida por firmware (no sanitaria)" :
+    "✕ Lectura sin validación suficiente";
 
   // Mediciones
   element("ph-value").textContent =
@@ -82,6 +96,8 @@ function showConnectionError(error) {
 
   element("mode-badge").textContent =
     "SIN CONEXIÓN";
+  element("reading-valid-status").textContent =
+    "— Lectura no disponible";
 
   element("status-light").className =
     "status-light offline";

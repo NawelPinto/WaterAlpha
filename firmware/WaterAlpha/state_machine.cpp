@@ -86,7 +86,7 @@ namespace WA {
 
       return {
         State::YELLOW,
-        "Lectura inestable.",
+        "La medicion de pH o temperatura no se ha estabilizado.",
         false
       };
     }
@@ -126,7 +126,7 @@ namespace WA {
 
       return {
         State::RED,
-        "pH fuera de referencia.",
+        "pH fuera del intervalo experimental. No indica potabilidad.",
         true
       };
     }
@@ -148,7 +148,7 @@ namespace WA {
 
       return {
         State::YELLOW,
-        "pH cercano a un limite.",
+        "pH cercano al limite experimental.",
         true
       };
     }
@@ -156,7 +156,7 @@ namespace WA {
     // 10. Sin anomalía detectada
     return {
       State::GREEN,
-      "pH dentro de referencia.",
+      "pH en referencia, lecturas estables. No indica potabilidad.",
       true
     };
   }

@@ -13,6 +13,7 @@
 #include <WiFi.h>
 #include "config.h"
 #include "web_server.h"
+#include "led_rgb.h"
 
 bool serverReady = false;
 
@@ -61,6 +62,7 @@ void loop() {
 
   // Actualizar mediciones y máquina de estados
   WAController::update();
+  WALed::update(); // Parpadeo no bloqueante de los indicadores
 
   // Atender solicitudes HTTP
   if (serverReady) {

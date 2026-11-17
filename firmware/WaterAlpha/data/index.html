@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>WaterAlpha | Evaluación de agua</title>
+  <title>WaterAlpha | Monitoreo instrumental de pH y temperatura</title>
 
   <!-- Conexión con nuestro archivo CSS -->
   <link rel="stylesheet" href="style.css">
@@ -24,12 +24,13 @@
     <!-- ENCABEZADO -->
     <header class="header">
       <span class="brand">WATER<span>ALPHA</span></span>
-      <p>Evaluación preliminar de agua</p>
+      <p>Monitoreo de pH y temperatura</p>
       <span id="mode-badge" class="mode">MODO SIMULACIÓN</span>
     </header>
 
     <!-- ESTADO PRINCIPAL -->
-    <section class="status-card">
+    <section class="scope-notice" role="note"><strong>Alcance de WaterAlpha Alpha:</strong> supervisión instrumental de <strong>pH y temperatura</strong>. El estado verde representa lecturas validadas y estables con pH dentro de la referencia experimental. <strong>No indica potabilidad ni aptitud para beber.</strong> No se miden patógenos, turbidez ni conductividad.</section>
+<section class="status-card">
       <div id="status-light" class="status-light blue"></div>
 
       <h1 id="status-title">Inicializando</h1>
@@ -45,20 +46,21 @@
       <article class="measurement-card">
         <h2>pH</h2>
         <p id="ph-value" class="value">--</p>
-        <span>Escala de pH</span>
+        <span>pH (adimensional) · referencia experimental 6,5–8,5</span>
       </article>
 
       <article class="measurement-card">
         <h2>Temperatura</h2>
         <p id="temperature-value" class="value">--</p>
-        <span>Grados Celsius (°C)</span>
+        <span>Grados Celsius (°C) · sin umbral sanitario</span>
       </article>
 
     </section>
 
     <!-- DIAGNÓSTICO -->
     <section class="diagnostics">
-      <h2>Estado del sistema</h2>
+      <h2>Calidad de adquisición (no sanitaria)</h2>
+      <p id="reading-valid-status">○ Validez de lectura: pendiente</p>
 
       <p id="ph-sensor-status">○ Sensor de pH: pendiente</p>
       <p id="temperature-sensor-status">○ Sensor de temperatura: pendiente</p>
@@ -70,7 +72,7 @@
 <!-- PANEL DE SIMULACIÓN -->
 <section class="simulator">
 
-  <h2>Simulador de sensores</h2>
+  <h2>Simulador de sensores — DATOS FICTICIOS</h2>
 
   <p class="simulator-description">
     Modifica las lecturas y condiciones del sistema.
@@ -145,6 +147,7 @@
 </section>
 
 
+<section class="persist-info"><h2>Registro de mediciones</h2><p>Las sesiones reales pueden guardarse en el PC mediante <code>python scripts/record_readings.py --url http://192.168.4.1/api/readings</code>. No se guardan automáticamente en GitHub. Los datos simulados siempre deben etiquetarse.</p></section>
 <!-- INSPECTOR DE API -->
 <details class="api-debug">
 
@@ -161,8 +164,8 @@
     <footer class="warning">
       <strong>Importante</strong>
       <p>
-        Evaluación preliminar. No certifica potabilidad
-        ni ausencia de patógenos.
+        Monitoreo instrumental limitado a pH y temperatura. El diagnóstico
+        NO certifica potabilidad, inocuidad ni ausencia de patógenos.
       </p>
     </footer>
 

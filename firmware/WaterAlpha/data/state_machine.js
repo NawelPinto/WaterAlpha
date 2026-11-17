@@ -74,7 +74,7 @@ window.WaterAlphaStateMachine = (() => {
       return result(
         "YELLOW",
         "Precaución",
-        "La lectura todavía no está estable."
+        "Las mediciones de pH o temperatura todavía no cumplen el criterio temporal de estabilidad."
       );
     }
 
@@ -105,7 +105,7 @@ window.WaterAlphaStateMachine = (() => {
       return result(
         "RED",
         "Anomalía detectada",
-        "El pH presenta una anomalía respecto de la referencia."
+        "pH fuera del intervalo experimental de referencia. No implica un diagnóstico sanitario."
       );
     }
 
@@ -120,7 +120,7 @@ window.WaterAlphaStateMachine = (() => {
       return result(
         "YELLOW",
         "Precaución",
-        "El pH está próximo a un límite de referencia."
+        "pH próximo al límite experimental del prototipo."
       );
     }
 
@@ -128,7 +128,7 @@ window.WaterAlphaStateMachine = (() => {
     return result(
       "GREEN",
       "Sin anomalía detectada",
-      "El pH está dentro de la referencia preliminar."
+      "El pH está dentro de la referencia experimental y las lecturas son estables. No indica potabilidad."
     );
   }
 

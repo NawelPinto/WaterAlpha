@@ -102,7 +102,9 @@ void handleReadings() {
   json.reserve(600);
 
   json += "{\"schema_version\":1,";
-  json += "\"mode\":\"MOCK\",";
+  json += "\"mode\":\"";
+  json += WAConfig::MOCK_MODE ? "MOCK" : "REAL";
+  json += "\",";
 
   json += "\"temperature\":";
   json += tempAvailable
@@ -131,6 +133,9 @@ void handleReadings() {
   json += ",\"reading_valid\":";
   json += asBool(s.decision.reading_valid);
 
+  json += ",\"uptime_ms\":";
+  json += String(millis());
+
   json += ",\"sample_age_ms\":";
   json += String(s.sample_age_ms);
 
@@ -139,8 +144,8 @@ void handleReadings() {
   json += "\"";
 
   json += ",\"warning\":\"";
-  json += "Evaluacion preliminar. ";
-  json += "No certifica potabilidad ni ";
+  json += "Monitoreo instrumental limitado a pH y temperatura. ";
+  json += "No certifica potabilidad, inocuidad ni ";
   json += "ausencia de patogenos.\"";
 
   json += "}";

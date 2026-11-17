@@ -9,7 +9,7 @@ window.WaterAlphaAPI = (() => {
   const config = window.WaterAlphaConfig;
 
   const WARNING =
-    "Evaluación preliminar. No certifica potabilidad ni ausencia de patógenos.";
+    "Evaluación limitada a pH y temperatura. No certifica potabilidad, inocuidad ni ausencia de patógenos.";
 
   // 1. Construir la respuesta simulada
   function getMockResponse() {

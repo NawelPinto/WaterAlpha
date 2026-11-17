@@ -35,6 +35,9 @@ namespace {
   double voltageWindow[WINDOW_CAPACITY]{};
   uint8_t windowCount = 0;
   uint8_t windowNext = 0;
+  float temperatureWindow[WINDOW_CAPACITY]{};
+  uint8_t tempCount = 0;
+  uint8_t tempNext = 0;
 
   float invalidFloat() {
     return std::numeric_limits<float>::quiet_NaN();
@@ -43,6 +46,28 @@ namespace {
   void clearVoltageWindow() {
     windowCount = 0;
     windowNext = 0;
+    tempCount = 0;
+    tempNext = 0;
+  }
+
+  bool updateTemperatureStability(float celsius) {
+    if (!std::isfinite(celsius) ||
+        WAConfig::TEMP_STABILITY_MAX_SPAN_C <= 0.0f) {
+      tempCount = 0;
+      tempNext = 0;
+      return false;
+    }
+    temperatureWindow[tempNext] = celsius;
+    tempNext = (tempNext + 1) % WINDOW_CAPACITY;
+    if (tempCount < WINDOW_CAPACITY) ++tempCount;
+    if (tempCount < WINDOW_CAPACITY) return false;
+    float low = temperatureWindow[0];
+    float high = temperatureWindow[0];
+    for (uint8_t i = 1; i < WINDOW_CAPACITY; ++i) {
+      if (temperatureWindow[i] < low) low = temperatureWindow[i];
+      if (temperatureWindow[i] > high) high = temperatureWindow[i];
+    }
+    return (high - low) <= WAConfig::TEMP_STABILITY_MAX_SPAN_C;
   }
 
   bool updateVoltageStability(double adcMillivolts) {
@@ -186,7 +211,7 @@ namespace {
       r.calibrated = ph.calibrated;
 
       if (r.ph_sensor_ok && r.temperature_sensor_ok) {
-        r.stable = updateVoltageStability(volts);
+        r.stable = updateVoltageStability(volts) && updateTemperatureStability(r.temperature);
       } else {
         clearVoltageWindow();
       }

@@ -28,7 +28,7 @@ namespace WAConfig {
   // Fuente de mediciones de pH
   // false: simulacion
   // true: adquirir desde el ADC1
-  constexpr bool USE_REAL_PH = true;
+  constexpr bool USE_REAL_PH = false; // BLOQUEADO hasta verificar circuito y calibracion
 
   // Fuente de temperatura
   // false: simulada
@@ -49,6 +49,10 @@ namespace WAConfig {
   // Rango nominal del DS18B20
   constexpr float TEMP_SENSOR_MIN = -55.0f;
   constexpr float TEMP_SENSOR_MAX = 125.0f;
+
+  // Umbral PROVISIONAL de estabilidad: amplitud de 5 lecturas consecutivas.
+  // No es un umbral sanitario ni una validacion experimental.
+  constexpr float TEMP_STABILITY_MAX_SPAN_C = 0.5f;
 
   // Nombre de la red creada por el ESP32
   constexpr char WIFI_SSID[] = "WaterAlpha";
@@ -71,7 +75,7 @@ namespace WAConfig {
   constexpr float PH_HYSTERESIS = 0.1f;
 
   // El firmware aún utilizará valores simulados
-  constexpr bool MOCK_MODE = false  ;
+  constexpr bool MOCK_MODE = true; // Modo seguro por defecto
 }
 
 #endif

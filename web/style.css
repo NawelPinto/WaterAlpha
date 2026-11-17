@@ -314,3 +314,13 @@ body {
 .simulator[hidden] {
   display: none;
 }
+
+/* Avance 3: declaración explícita de alcance y registro */
+.scope-notice,.persist-info{background:#112235;border:1px solid #37606b;border-radius:16px;padding:18px 22px;margin:16px 0;line-height:1.65;color:#d7e8ef;font-size:14px}
+.scope-notice strong{color:#9aede0}
+.persist-info{border-color:#244256}
+.persist-info h2{margin:0 0 8px;font-size:18px}
+.persist-info p{margin:0;color:#a9c2ce}
+.persist-info code{color:#7be4d2;overflow-wrap:anywhere}
+.status-light.magenta{animation:error-pulse .55s steps(1) infinite}
+@media(prefers-reduced-motion:reduce){.status-light.magenta{animation:none}}

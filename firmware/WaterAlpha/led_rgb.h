@@ -1,17 +1,10 @@
-
 #ifndef WATERALPHA_LED_RGB_H
 #define WATERALPHA_LED_RGB_H
-
 #include "types.h"
-
+// Nombre heredado; maneja tres LED discretos rojo, verde y amarillo.
 namespace WALed {
-
-  // Preparar controlador fisico
-  void begin();
-
-  // Mostrar un estado del sistema
-  void setState(WA::State state);
-
+ void begin();
+ void setState(WA::State state);
+ void update();
 }
-
 #endif

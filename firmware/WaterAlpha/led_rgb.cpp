@@ -1,185 +1,52 @@
-
 #include <Arduino.h>
-
 #include "led_rgb.h"
-#include "led_colors.h"
 #include "config.h"
 #include "pins.h"
+#include "led_status_logic.h"
 
 namespace {
+ bool ready=false;
+ WA::State current=WA::State::BLUE;
 
-  bool ledReady = false;
-
-  // Primera comprobacion de capacidad de salida.
-  // No sustituye la revision del pinout UAI.
-  bool candidateOutputPin(int pin) {
-
-    // GPIO 34-39 son solo entradas.
-    // GPIO 6-11 estan reservados para Flash
-    // en el modulo ESP32 clasico.
-    return (
-      pin >= 0 &&
-      pin <= 33 &&
-      !(pin >= 6 && pin <= 11)
-    );
-  }
-
-  bool wiringAllowed() {
-
-    if (
-      !WAPins::PINOUT_CONFIRMED ||
-      !WAPins::LED_TYPE_CONFIRMED
-    ) {
-      return false;
-    }
-
-    int r = WAPins::PIN_LED_R;
-    int g = WAPins::PIN_LED_G;
-    int b = WAPins::PIN_LED_B;
-
-    // Los tres pines deben ser distintos.
-    if (r == g || r == b || g == b) {
-      return false;
-    }
-
-    return (
-      candidateOutputPin(r) &&
-      candidateOutputPin(g) &&
-      candidateOutputPin(b)
-    );
-  }
-
-  uint32_t pwmDuty(bool enabled) {
-
-    uint32_t value =
-      enabled ? WAConfig::LED_BRIGHTNESS : 0;
-
-    // Invertir para anodo comun.
-    if (WAPins::LED_COMMON_ANODE) {
-      value = 255 - value;
-    }
-
-    return value;
-  }
-
-  void writeChannel(int pin, bool enabled) {
-
-    ledcWrite(
-      static_cast<uint8_t>(pin),
-      pwmDuty(enabled)
-    );
-  }
-
+ bool candidate(int pin) {
+   // Solo candidatos de salida del ESP32 clasico. Es necesario verificar
+   // ademas la placa UAI, strapping, UART y perifericos ya ocupados.
+   return pin>=12 && pin<=33 && pin!=12 && pin!=15 && pin!=16 && pin!=17;
+ }
+ bool wiringOK() {
+   const int r=WAPins::PIN_LED_R,g=WAPins::PIN_LED_G,y=WAPins::PIN_LED_B;
+   if (!WAPins::PINOUT_CONFIRMED || !WAPins::LED_TYPE_CONFIRMED) return false;
+   if (!candidate(r)||!candidate(g)||!candidate(y)) return false;
+   if (r==g||r==y||g==y) return false;
+   if (r==WAPins::PIN_TEMP||g==WAPins::PIN_TEMP||y==WAPins::PIN_TEMP) return false;
+   if (r==WAPins::PIN_PH_ADC||g==WAPins::PIN_PH_ADC||y==WAPins::PIN_PH_ADC) return false;
+   return true;
+ }
+ void write(int pin,bool on) {digitalWrite(pin,on?HIGH:LOW);}
 }
 
 namespace WALed {
-
-  void begin() {
-
-    ledReady = false;
-
-    if (!WAConfig::USE_REAL_LED) {
-      Serial.println("[LED] Modo MOCK");
-      return;
-    }
-
-    if (!wiringAllowed()) {
-
-      Serial.println(
-        "[LED] ERROR: cableado no confirmado"
-      );
-
-      return;
-    }
-
-    const uint32_t frequency =
-      WAConfig::LED_PWM_FREQUENCY;
-
-    const uint8_t resolution =
-      WAConfig::LED_PWM_BITS;
-
-    // Asociar pines a canales PWM.
-    bool okR = ledcAttach(
-      WAPins::PIN_LED_R,
-      frequency,
-      resolution
-    );
-
-    bool okG = ledcAttach(
-      WAPins::PIN_LED_G,
-      frequency,
-      resolution
-    );
-
-    bool okB = ledcAttach(
-      WAPins::PIN_LED_B,
-      frequency,
-      resolution
-    );
-
-    if (!okR || !okG || !okB) {
-
-      Serial.println(
-        "[LED] ERROR: no se pudo iniciar PWM"
-      );
-
-      // Desactivar y liberar los canales
-      // que hayan logrado inicializarse.
-      const uint32_t offDuty = pwmDuty(false);
-
-      if (okR) {
-        ledcWrite(WAPins::PIN_LED_R, offDuty);
-        ledcDetach(WAPins::PIN_LED_R);
-      }
-
-      if (okG) {
-        ledcWrite(WAPins::PIN_LED_G, offDuty);
-        ledcDetach(WAPins::PIN_LED_G);
-      }
-
-      if (okB) {
-        ledcWrite(WAPins::PIN_LED_B, offDuty);
-        ledcDetach(WAPins::PIN_LED_B);
-      }
-
-      return;
-    }
-
-    ledReady = true;
-
-    // Comenzar con todos los canales apagados.
-    writeChannel(WAPins::PIN_LED_R, false);
-    writeChannel(WAPins::PIN_LED_G, false);
-    writeChannel(WAPins::PIN_LED_B, false);
-
-    Serial.println("[LED] RGB inicializado");
-  }
-
-
-  void setState(WA::State state) {
-
-    // Nunca escribir sobre pines no habilitados.
-    if (!ledReady) {
-      return;
-    }
-
-    WAColors::Channels color =
-      WAColors::fromState(state);
-
-    writeChannel(
-      WAPins::PIN_LED_R,
-      color.red
-    );
-
-    writeChannel(
-      WAPins::PIN_LED_G,
-      color.green
-    );
-
-    writeChannel(
-      WAPins::PIN_LED_B,
-      color.blue
-    );
-  }
-
+ void begin() {
+   ready=false;
+   if (!WAConfig::USE_REAL_LED) {
+     Serial.println("[LED] Tres indicadores: solo Serial; hardware inactivo");
+     return;
+   }
+   if (!wiringOK()) {
+     Serial.println("[LED] BLOQUEO: GPIO/polaridad/resistencias sin verificar");
+     return;
+   }
+   const int ps[]={WAPins::PIN_LED_R,WAPins::PIN_LED_G,WAPins::PIN_LED_B};
+   for (int pin:ps) {digitalWrite(pin,LOW);pinMode(pin,OUTPUT);}
+   ready=true;
+   update();
+ }
+ void setState(WA::State state) {current=state;update();}
+ void update() {
+   if (!ready)return;
+   const auto output=WALedLogic::fromState(current,millis());
+   write(WAPins::PIN_LED_R,output.red);
+   write(WAPins::PIN_LED_G,output.green);
+   write(WAPins::PIN_LED_B,output.yellow);
+ }
 }
