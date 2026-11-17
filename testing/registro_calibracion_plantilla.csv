@@ -1,0 +1,4 @@
+patron,ph_nominal,temp_C,adc_mv_1,adc_mv_2,adc_mv_3,adc_mv_4,adc_mv_5,adc_promedio_mv,adc_min_mv,adc_max_mv,tiempo_estabilizacion_s,fecha,observaciones
+CAL_1,4.00,,,,,,,,,,,,
+CAL_2,10.00,,,,,,,,,,,,
+VERIFICACION,7.00,,,,,,,,,,,,

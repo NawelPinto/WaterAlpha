@@ -1,0 +1,22 @@
+item,componente,cantidad_confirmada,estado,especificacion,funcion,costo_CLP,nota
+H01,Placa UAI Ai-Thinker ESP-32S,1,DISPONIBLE,GPIO y Flash por verificar,Procesamiento y Wi-Fi,,No asumir pinout de otro kit
+H02,DS18B20 impermeable,1,DISPONIBLE,3 hilos y 1-Wire,Temperatura,,Comprobar colores de cables
+H03,Modulo y electrodo pH AFEL,1,DISPONIBLE,~5V nominal pendiente de verificar,Medicion pH,,AO medir antes de conectar
+H04,Protoboard 5x17 de dos grupos,2,DISPONIBLE,Conexion experimental,Montaje temporal,,No expuesta a agua
+H05,Cable Dupont hembra-hembra,2,DISPONIBLE,Tipo F-F,Interconexiones,,Cantidad total de cables puede ser insuficiente
+H06,Cable Dupont macho-macho,2,DISPONIBLE,Tipo M-M,Interconexiones,,Cantidad total de cables puede ser insuficiente
+H07,Cable Dupont macho-hembra,4,DISPONIBLE,Tipo M-F,Interconexiones,,Cantidad total de cables puede ser insuficiente
+H08,Resistencia pull-up 4.7 kOhm,1,REPORTADA,Confirmar 4.7 kOhm,DS18B20 DATA a 3V3,,Verificar multimetro
+H09,Resistencia 10 kOhm,2,REPORTADA,Confirmar unidad y valor,Divisor potencial,,Sin validacion de impedancia
+H10,Resistencia 22.5 kOhm,1,REPORTADA,Confirmar unidad y valor,Divisor potencial,,Alternativa Rsuperior 22.5k con inferior 10k
+H11,LED rojo discreto,1,REPORTADA,Confirmar que sea LED de dos terminales,Alarma de pH,,No confundir con LED RGB
+H12,LED amarillo discreto,1,REPORTADA,Confirmar que sea LED de dos terminales,Precaucion/inicio,,Usa resistencia de corriente propia
+H13,LED verde discreto,1,REPORTADA,Confirmar que sea LED de dos terminales,Estado de referencia,,Usa resistencia de corriente propia
+H14,Resistencia LED 330 Ohm,3,FALTANTE,Una por LED para ~5mA tipico,Limitar corriente,,Comprar/comprobar Vf y limites de GPIO
+H15,Multimetro digital,1,NO CONFIRMADO,Voltaje DC y resistencia,Seguridad electrica,,Indispensable antes de ADC
+H16,Soluciones tampon de pH,3,NO CONFIRMADO,pH4 pH7 pH10 y especificaciones/fecha,Calibracion y verificacion,,Dos para ajustar y tercero para verificar
+H17,Termometro de referencia,1,NO CONFIRMADO,Escala y error de referencia documentados,Contraste de temperatura,,Recomendado para validacion
+H18,Cable USB de datos,1,DISPONIBLE,Compatible con placa UAI,Programacion y alimentacion,,Verificar cargador y puerto
+H19,PC Windows con Arduino IDE VSCode Python,1,DISPONIBLE,Entorno de desarrollo,Programacion datos y web,,Reloj ajustado para registro
+H20,Encapsulado prototipo impreso,1,DISPONIBLE,Geometria abierta visible en fotos,Soporte mecanico,,No estanco; planos/cotas pendientes
+H21,Contenedor para muestra,1,NO CONFIRMADO,Material impermeable y estable,Separar agua de electronica,,No dejar placas bajo el agua
